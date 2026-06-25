@@ -1,31 +1,54 @@
 """
-github.py — all GitHub CLI interactions
+github.py — all GitHub CLI interactions with retry hardening
 """
 
-import subprocess, json, re
+import subprocess, json, re, time
 
 REPO = "StabilityNexus/MiniChain"
+GH_RETRIES     = 3
+GH_RETRY_SLEEP = 2  # seconds
+
+
+def _gh_run(cmd):
+    """Run a gh command with retry logic. Returns (returncode, stdout, stderr)."""
+    last_err = None
+    for attempt in range(1, GH_RETRIES + 1):
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True, encoding="utf-8", errors="replace", timeout=60
+            )
+            if result.returncode == 0:
+                return result.returncode, result.stdout, result.stderr
+            last_err = result.stderr.strip()
+        except subprocess.TimeoutExpired:
+            last_err = "gh command timed out (60s)"
+        except Exception as e:
+            last_err = str(e)
+        if attempt < GH_RETRIES:
+            print(f"    gh retry {attempt}/{GH_RETRIES} — {last_err[:80]}")
+            time.sleep(GH_RETRY_SLEEP)
+    print(f"    gh failed after {GH_RETRIES} retries: {last_err[:120] if last_err else 'unknown'}")
+    return result.returncode, result.stdout, result.stderr
+
 
 def gh(endpoint):
-    result = subprocess.run(
-        ["gh", "api", f"https://api.github.com/{endpoint}"],
-        capture_output=True, encoding="utf-8", errors="replace"
-    )
-    if result.returncode != 0:
+    code, stdout, _ = _gh_run(["gh", "api", f"https://api.github.com/{endpoint}"])
+    if code != 0:
         return []
     try:
-        return json.loads(result.stdout)
+        return json.loads(stdout)
     except Exception:
         return []
 
+
 def gh_paginate(endpoint):
-    result = subprocess.run(
-        ["gh", "api", "--paginate", f"https://api.github.com/{endpoint}"],
-        capture_output=True, encoding="utf-8", errors="replace"
+    code, stdout, _ = _gh_run(
+        ["gh", "api", "--paginate", f"https://api.github.com/{endpoint}"]
     )
-    if result.returncode != 0:
+    if code != 0:
         return []
-    text = result.stdout.strip()
+    text = stdout.strip()
     if not text:
         return []
     try:
@@ -38,25 +61,21 @@ def gh_paginate(endpoint):
         except Exception:
             return []
 
+
 def fetch_prs():
-    # TEST: last 10 closed. For production use gh_paginate below.
     prs = gh(f"repos/{REPO}/pulls?state=closed&per_page=10&sort=updated&direction=desc")
     return prs if isinstance(prs, list) else []
-    # PRODUCTION:
-    # return gh_paginate(f"repos/{REPO}/pulls?state=open&per_page=100")
+
 
 def fetch_pr_files(n):
     files = gh(f"repos/{REPO}/pulls/{n}/files?per_page=100")
     return [f["filename"] for f in files] if isinstance(files, list) else []
 
+
 def fetch_coderabbit_sections(n):
-    """
-    Fetch ONLY the Walkthrough and Changes sections from CodeRabbit.
-    Everything else (sequence diagrams, poems, tips) is ignored.
-    """
+    """Fetch ONLY the Walkthrough and Changes sections from CodeRabbit comment."""
     raw = None
 
-    # Check issue comments first
     comments = gh(f"repos/{REPO}/issues/{n}/comments?per_page=50")
     if isinstance(comments, list):
         for c in comments:
@@ -64,7 +83,6 @@ def fetch_coderabbit_sections(n):
                 raw = c["body"]
                 break
 
-    # Fallback: PR reviews
     if not raw:
         reviews = gh(f"repos/{REPO}/pulls/{n}/reviews?per_page=50")
         if isinstance(reviews, list):
@@ -78,20 +96,11 @@ def fetch_coderabbit_sections(n):
 
     return extract_walkthrough_and_changes(raw)
 
+
 def extract_walkthrough_and_changes(text):
-    """
-    Pull only the Walkthrough and Changes table from a CodeRabbit comment.
-    CodeRabbit structure:
-      ## Walkthrough
-      <text>
-      ## Changes
-      | File | Summary |
-      ...
-      ## Sequence Diagram(s)   ← stop here
-    """
+    """Pull only the Walkthrough and Changes table from a CodeRabbit comment."""
     result = {}
 
-    # Extract Walkthrough section
     wt_match = re.search(
         r"##\s*Walkthrough\s*\n(.*?)(?=\n##\s|\Z)",
         text, re.DOTALL | re.IGNORECASE
@@ -99,7 +108,6 @@ def extract_walkthrough_and_changes(text):
     if wt_match:
         result["walkthrough"] = wt_match.group(1).strip()
 
-    # Extract Changes section (table)
     ch_match = re.search(
         r"##\s*Changes\s*\n(.*?)(?=\n##\s|\Z)",
         text, re.DOTALL | re.IGNORECASE
@@ -108,17 +116,18 @@ def extract_walkthrough_and_changes(text):
         result["changes"] = ch_match.group(1).strip()
 
     if not result:
-        # Fallback: return first 800 chars if structure not found
         result["walkthrough"] = text[:800]
         result["changes"] = ""
 
     return result
+
 
 def extract_linked_issue(body):
     if not body:
         return None
     m = re.search(r"(?:fixes|closes|resolves)\s+#(\d+)", body, re.IGNORECASE)
     return int(m.group(1)) if m else None
+
 
 def check_gh_auth():
     result = subprocess.run(
