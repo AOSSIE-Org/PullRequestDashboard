@@ -86,6 +86,7 @@ def _build_pr_data(raw):
         "body":       raw.get("body", "") or "",
         "files":      files,
         "coderabbit": coderabbit,
+        "_incomplete": files_error or cr_error,
     }
 
 
@@ -116,7 +117,10 @@ def main():
         num = raw["number"]
         print(f"  PR #{num} — {raw.get('title', '')[:55]}")
         try:
-            pr_data.append(_build_pr_data(raw))
+            pr = _build_pr_data(raw)
+            pr_data.append(pr)
+            if pr.get("_incomplete"):
+                failed += 1
         except Exception as e:
             print(f"  ERROR PR #{num}: {e} — using fallback placeholder")
             pr_data.append(_build_fallback_pr(raw))

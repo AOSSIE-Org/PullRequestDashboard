@@ -11,6 +11,9 @@ GH_RETRY_SLEEP = 2  # seconds
 
 def _gh_run(cmd):
     """Run a gh command with retry logic. Returns (returncode, stdout, stderr)."""
+    code = -1
+    stdout = ""
+    stderr = ""
     last_err = None
     for attempt in range(1, GH_RETRIES + 1):
         try:
@@ -20,16 +23,25 @@ def _gh_run(cmd):
             )
             if result.returncode == 0:
                 return result.returncode, result.stdout, result.stderr
+            code = result.returncode
+            stdout = result.stdout
+            stderr = result.stderr
             last_err = result.stderr.strip()
         except subprocess.TimeoutExpired:
-            last_err = "gh command timed out (60s)"
+            code = -1
+            stdout = ""
+            stderr = "gh command timed out (60s)"
+            last_err = stderr
         except Exception as e:
-            last_err = str(e)
+            code = -1
+            stdout = ""
+            stderr = str(e)
+            last_err = stderr
         if attempt < GH_RETRIES:
             print(f"    gh retry {attempt}/{GH_RETRIES} — {last_err[:80]}")
             time.sleep(GH_RETRY_SLEEP)
     print(f"    gh failed after {GH_RETRIES} retries: {last_err[:120] if last_err else 'unknown'}")
-    return result.returncode, result.stdout, result.stderr
+    return code, stdout, stderr
 
 
 def gh(endpoint):
