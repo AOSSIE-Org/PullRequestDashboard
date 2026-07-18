@@ -4,7 +4,7 @@
 <!-- Organization Logo -->
 <div align="center" style="display: flex; align-items: center; justify-content: center; gap: 16px;">
   <img alt="AOSSIE" src="public/aossie-logo.svg" width="175">
-  <img src="public/stability.svg" width="175" />
+  <img src="public/stability.svg" width="175" alt="Project stability status" />
 </div>
 
 &nbsp;
