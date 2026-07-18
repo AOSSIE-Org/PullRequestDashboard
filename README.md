@@ -54,7 +54,7 @@
 
 **Pull Request Dashboard** (PR Dashboard) is a core module in the [AOSSIE Skills Ecosystem](https://github.com/AOSSIE-Org/skills). It is a local-first analysis tool designed to help project maintainers review incoming pull requests, identify semantic conflicts, analyze architectural gaps, and determine optimal merge sequences.
 
-By querying the GitHub API via the GitHub CLI (`gh`), fetching PR diffs and automated AI Bot Reviewer (e.g., CodeRabbit, Devin) walkthrough summaries, loading codebase context (`context.md`), and calling local Ollama models, the tool generates a visual Conflict Directed Acyclic Graph (DAG) detailing merge reasoning and post-merge impacts.
+By querying the GitHub API via the GitHub CLI (`gh`), fetching PR diffs and automated AI Bot Reviewer (e.g., CodeRabbit, Devin) walkthrough summaries, loading codebase context (`context.md`), embedding and clustering PRs with SentenceTransformer using `all-MiniLM-L6-v2` in `grouping.py`, and calling local Ollama models for deeper group and isolated-PR analyses, the tool generates a visual Conflict Directed Acyclic Graph (DAG) detailing merge reasoning and post-merge impacts.
 
 ---
 
@@ -106,7 +106,7 @@ flowchart TD
 
 ## 🚀 Key Features
 
-* **Semantic PR Clustering**: Uses a local Ollama model to group and cluster PRs based on semantic similarity of code changes and modified subcomponents.
+* **Semantic PR Clustering**: Attributes semantic PR embedding and clustering to SentenceTransformer using `all-MiniLM-L6-v2` in `grouping.py`, while local Ollama models are responsible for deeper group and isolated-PR analyses.
 * **Conflict DAG Visualization**: Renders an interactive HTML report (`conflicts_tree.html`) detailing overlapping file conflicts, recommended merge sequences, and post-merge architectural impacts.
 * **Isolated PR Filtering**: Identifies non-conflicting, independent PRs and lists them in `isolated_prs.html` for immediate, safe merging.
 * **Local-First Analysis**: Executes all clustering, evaluation, and DAG reasoning locally through Ollama, ensuring data privacy with zero external API costs.
@@ -117,6 +117,7 @@ flowchart TD
 ## 💻 Tech Stack
 
 * **CLI Integration**: GitHub CLI (`gh`)
+* **Embeddings & Clustering**: sentence-transformers (`all-MiniLM-L6-v2`)
 * **Local Model Server**: Ollama (`qwen2.5:7b` / `llama3`)
 * **Programming Language**: Python 3.10+
 * **Report Rendering**: HTML5, Vanilla CSS, Tailwind CSS
