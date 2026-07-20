@@ -4,7 +4,7 @@
 <!-- Organization Logo -->
 <div align="center" style="display: flex; align-items: center; justify-content: center; gap: 16px;">
   <img alt="AOSSIE" src="public/aossie-logo.svg" width="175">
-  <img src="public/todo-project-logo.svg" width="175" />
+  <img src="public/stability.svg" width="175" alt="Project stability status" />
 </div>
 
 &nbsp;
@@ -12,8 +12,7 @@
 <!-- Organization Name -->
 <div align="center">
 
-[![Static Badge](https://img.shields.io/badge/aossie.org/TODO-228B22?style=for-the-badge&labelColor=FFC517)](https://TODO.aossie.org/)
-
+[![Static Badge](https://img.shields.io/badge/aossie.org/PullRequestDashboard-228B22?style=for-the-badge&labelColor=FFC517)](https://github.com/AOSSIE-Org/PullRequestDashboard)
 <!-- Correct deployed url to be added -->
 
 </div>
@@ -41,210 +40,200 @@
   <img src="https://img.shields.io/youtube/channel/subscribers/UCKVVLbawY7Gej_3o2WKsoiA?style=flat&logo=youtube&logoColor=white%20&logoSize=auto&labelColor=FF0000&color=FF0000" alt="Youtube Badge"></a>
 
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/{owner}/{repo}/badge)](https://scorecard.dev/viewer/?uri=github.com/{owner}/{repo})
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/AOSSIE-Org/PullRequestDashboard/badge)](https://scorecard.dev/viewer/?uri=github.com/AOSSIE-Org/PullRequestDashboard)
 
-[![Best Practices](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2F%7Bowner%7D%2F%7Brepo%7D%2Fmain%2Fchecklist-status.json&logo=openssf)](./BestPracticesChecklist.md)
+[![Best Practices](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FAOSSIE-Org%2FPullRequestDashboard%2Fmain%2Fchecklist-status.json&logo=openssf)](./BestPracticesChecklist.md)
 </p>
 
 ---
 
 <div align="center">
-<h1>TODO: Project Name</h1>
+<h1>AOSSIE Pull Request Dashboard</h1>
+<h3>Local-First Merge Analysis & Conflict Resolution Dashboard</h3>
 </div>
 
-[TODO](https://TODO.stability.nexus/) is a ... TODO: Project Description.
+**Pull Request Dashboard** (PR Dashboard) is a core module in the [AOSSIE Skills Ecosystem](https://github.com/AOSSIE-Org/skills). It is a local-first analysis tool designed to help project maintainers review incoming pull requests, identify semantic conflicts, analyze architectural gaps, and determine optimal merge sequences.
+
+By querying the GitHub API via the GitHub CLI (`gh`), fetching PR diffs and automated AI Bot Reviewer (e.g., CodeRabbit, Devin) walkthrough summaries, loading codebase context (`context.md`), embedding and clustering PRs with SentenceTransformer using `all-MiniLM-L6-v2` in `grouping.py`, and calling local Ollama models for deeper group and isolated-PR analyses, the tool generates a visual Conflict Directed Acyclic Graph (DAG) detailing merge reasoning and post-merge impacts.
 
 ---
 
-## 🚀 Features
+## 🏗️ Role in the Skills Ecosystem
 
-TODO: List your main features here:
+The PR Dashboard acts as the primary code quality and merge analysis layer for maintainers:
 
-- **Feature 1**: Description
-- **Feature 2**: Description
-- **Feature 3**: Description
-- **Feature 4**: Description
+```mermaid
+flowchart TD
+    %% Nodes
+    SC["<b><font color='#F59E0B'>Skills Context</font></b><br><br>Skills Core (Shared Org wide skills)<br>per-repo skills (AGENTS.md + skills/ directory)"]
+    Contributors["Contributors"]
+    Maintainers["Maintainers"]
+    
+    SB["<b><font color='#F59E0B'>Skill Bot</font></b> (Discord Assistant)<br><br>Answers contributor questions<br>using asked question-oriented project skills ➔ LLM fallback"]
+    PD["<b><font color='#F59E0B'>PR Dashboard</font></b> (Merge Analysis)<br><br>Clusters PRs semantically, injects skills & communication(e.g. Discord) context.<br>Extracts PR changes briefly & open questions for maintainers to review.<br>Prepares Conflict DAG with merge reasoning & post-merge impact."]
+    SU["<b><font color='#F59E0B'>Skill Updater</font></b> (Knowledge Evolution)<br><br>Collects all logs from different components.<br>Updates relevant repo-skills by asking maintainers or admins<br>to review and approve generated updates."]
+
+    %% Edges
+    %% Contributor Flow
+    Contributors -- "Ask Questions in Discord" --> SB
+    SC -- "Powers answers" --> SB
+    SB -- "If gaps found, send logs for maintainers<br>to answer and update project skill via updater." --> SU
+
+    %% Maintainer Flow
+    Maintainers -- "Reviews PRs<br>with" --> PD
+    SC -- "Powers reasoning" --> PD
+    PD -- "If gaps found, send logs for maintainers<br>to answer and update those project skills via updater." --> SU
+
+    %% Feedback Loop & Sync
+    Maintainers -- "Collects communication platform (e.g. Discord) discussions, filters important<br>topics by giving that repo-skills context, and sends suggested updates to maintainers<br>to reformat or modify as needed (maintainer approve)" --> SU
+    SU -- "PR Skill Updater bot opens PR for gap skills and<br>recently merged PR context (maintainers approve)" --> SC
+
+    %% Style Classes
+    classDef yellowBox fill:#1E293B,stroke:#F59E0B,stroke-width:2px,color:#F8FAFC;
+    classDef purpleBox fill:#1E293B,stroke:#8B5CF6,stroke-width:2px,color:#F8FAFC;
+    
+    class SC,SB,PD,SU yellowBox;
+    class Contributors,Maintainers purpleBox;
+```
+
+
+1. **Pull Request Fetching**: The dashboard connects to GitHub via `gh` to retrieve open/closed PRs, modified files, and AI Bot Reviewer (e.g., CodeRabbit, Devin) summaries.
+2. **Context-Grounded Reasoning**: It reads the local repository context (`context.md`) and the global/per-repo skills from the Skills Core to evaluate PRs against the project rules.
+3. **DAG Generation**: It renders an interactive Conflict DAG illustrating PR dependency relationships, suggested merge sequences, and post-merge impact.
+4. **Gap Logging**: If the dashboard identifies any architectural gaps or changes not covered in the current skills context, it logs them to `gap_log.json` to be consumed by the [Skill Updater](https://github.com/kpj2006/skill-updater).
+
+---
+
+## 🚀 Key Features
+
+* **Semantic PR Clustering**: Attributes semantic PR embedding and clustering to SentenceTransformer using `all-MiniLM-L6-v2` in `grouping.py`, while local Ollama models are responsible for deeper group and isolated-PR analyses.
+* **Conflict DAG Visualization**: Renders an interactive HTML report (`conflicts_tree.html`) detailing overlapping file conflicts, recommended merge sequences, and post-merge architectural impacts.
+* **Isolated PR Filtering**: Identifies non-conflicting, independent PRs and lists them in `isolated_prs.html` for immediate, safe merging.
+* **Local-First Analysis**: Executes all clustering, evaluation, and DAG reasoning locally through Ollama, ensuring data privacy with zero external API costs.
+* **Feedback Loop Gap Signaling**: Emits gap events for the Skill Updater pipeline when developer PRs introduce architectural changes that are not documented in the skills.
 
 ---
 
 ## 💻 Tech Stack
 
-TODO: Update based on your project
-
-### Frontend
-- React / Next.js / Flutter / React Native
-- TypeScript
-- TailwindCSS
-
-### Backend
-- Flask / FastAPI / Node.js / Supabase
-- Database: PostgreSQL / SQLite / MongoDB
-
-### AI/ML (if applicable)
-- LangChain / LangGraph / LlamaIndex
-- Google Gemini / OpenAI / Anthropic Claude
-- Vector Database: Weaviate / Pinecone / Chroma
-- RAG / Prompt Engineering / Agent Frameworks
-
-### Blockchain (if applicable)
-- Solidity / solana / cardano / ergo Smart Contracts
-- Hardhat / Truffle / foundry
-- Web3.js / Ethers.js / Wagmi
-- OpenZeppelin / alchemy / Infura
+* **CLI Integration**: GitHub CLI (`gh`)
+* **Embeddings & Clustering**: sentence-transformers (`all-MiniLM-L6-v2`)
+* **Local Model Server**: Ollama (`qwen2.5:7b` / `llama3`)
+* **Programming Language**: Python 3.10+
+* **Report Rendering**: HTML5, Vanilla CSS, Tailwind CSS
 
 ---
-
-## ✅ Project Checklist
-
-TODO: Complete applicable items based on your project type
-
-- [ ] **The protocol** (if applicable):
-   - [ ] has been described and formally specified in a paper.
-   - [ ] has had its main properties mathematically proven.
-   - [ ] has been formally verified.
-- [ ] **The smart contracts** (if applicable):
-   - [ ] were thoroughly reviewed by at least two knights of The Stable Order.
-   - [ ] were deployed to: [Add deployment details]
-- [ ] **The mobile app** (if applicable):
-   - [ ] has an _About_ page containing the Stability Nexus's logo and pointing to the social media accounts of the Stability Nexus.
-   - [ ] is available for download as a release in this repo.
-   - [ ] is available in the relevant app stores.
-- [ ] **The AI/ML components** (if applicable):
-   - [ ] LLM/model selection and configuration are documented.
-   - [ ] Prompts and system instructions are version-controlled.
-   - [ ] Content safety and moderation mechanisms are implemented.
-   - [ ] API keys and rate limits are properly managed.
-
----
-
 ## 🔗 Repository Links
 
-TODO: Update with your repository structure
+1. [Skills Core Repository](https://github.com/AOSSIE-Org/Skills)
+2. [Interactive Simulation](https://github.com/kpj2006/InteractiveSimulation) (Live Demo: [demo](https://kpj2006.github.io/InteractiveSimulation/))
+3. [Skill Bot Assistant](https://github.com/AOSSIE-Org/SkillBot)
+4. [Skill Updater Pipeline](https://github.com/kpj2006/skill-updater)
 
-1. [Main Repository](https://github.com/AOSSIE-Org/TODO)
-2. [Frontend](https://github.com/AOSSIE-Org/TODO/tree/main/frontend) (if separate)
-3. [Backend](https://github.com/AOSSIE-Org/TODO/tree/main/backend) (if separate)
 
----
-
-## 🏗️ Architecture Diagram
-
-TODO: Add your system architecture diagram here
-
-```
-[Architecture Diagram Placeholder]
-```
-
-You can create architecture diagrams using:
-- [Draw.io](https://draw.io)
-- [Excalidraw](https://excalidraw.com)
-- [Lucidchart](https://lucidchart.com)
-- [Mermaid](https://mermaid.js.org) (for code-based diagrams)
-
-Example structure to include:
-- Frontend components
-- Backend services
-- Database architecture
-- External APIs/services
-- Data flow between components
-
----
-
-## 🔄 User Flow
-
-TODO: Add user flow diagrams showing how users interact with your application
-
-```
-[User Flow Diagram Placeholder]
-```
-
-### Key User Journeys
-
-TODO: Document main user flows:
-
-1. **User Journey 1**: Description
-   - Step 1
-   - Step 2
-   - Step 3
-
-2. **User Journey 2**: Description
-   - Step 1
-   - Step 2
-   - Step 3
-
-3. **User Journey 3**: Description
-   - Step 1
-   - Step 2
-   - Step 3
-
----
-
-## �🍀 Getting Started
+## 🏁 Getting Started
 
 ### Prerequisites
 
-TODO: List what developers need installed
+* **Python 3.10+**
+* **Ollama** installed and running on your local machine.
+* **GitHub CLI (`gh`)** installed and authenticated with your GitHub account:
+  ```bash
+  gh auth login
+  ```
 
-- Node.js 18+ / Python 3.9+ / Flutter SDK
-- npm / yarn / pnpm
-- [Any specific tools or accounts needed]
+---
 
-### Installation
-
-TODO: Provide detailed setup instructions
+### Installation & Run
 
 #### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/AOSSIE-Org/TODO.git
-cd TODO
+git clone https://github.com/AOSSIE-Org/PullRequestDashboard.git
+cd PullRequestDashboard
 ```
 
-#### 2. Install Dependencies
+#### 2. Set Up Virtual Environment & Dependencies
+
+**Windows (PowerShell):**
+
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+**macOS / Linux:**
 
 ```bash
-npm install
-# or
-yarn install
-# or
-pnpm install
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 ```
 
-#### 3. Configure Environment Variables(.env.example)
+#### 3. Setup Context File
 
-Create a `.env` file in the root directory:
+Ensure you have a `context.md` file detailing the repository architecture inside the dashboard folder (a default context file for [MiniChain](https://github.com/StabilityNexus/MiniChain) is provided as `context.md`).
 
-```env
-# Add your environment variables here
-API_KEY=your_api_key
-DATABASE_URL=your_database_url
-```
+#### 4. Configuration
 
-#### 4. Run the Development Server
+All configuration settings are defined at the top of each script file—no `.env` file is required.
+
+* **`github.py`** — Set the target repository:
+  
+  ```python
+  REPO = "StabilityNexus/MiniChain"  # ← Change to your repository
+  ```
+
+* **`grouping.py`** — Tune the clustering sensitivity:
+  
+  ```python
+  THRESHOLD = 0.55   # Lower value = more groups, higher value = fewer but tighter groups
+  MIN_SIZE  = 2      # Minimum PRs needed to form a conflict group
+  ```
+
+* **`ollama.py`** — Choose the local LLM model:
+  
+  ```python
+  OLLAMA_MODEL = "qwen2.5:7b"  # Specify the Ollama model to use
+  ```
+
+* **Switch to Production Mode (Open PRs)** in **`github.py`**:
+  
+  By default, the dashboard runs on recent closed PRs for testing. Switch to open PRs for production:
+  
+  ```python
+  # Comment out the test line, and uncomment the production line:
+  # prs = gh(f"repos/{REPO}/pulls?state=closed&per_page=10&sort=updated&direction=desc")
+  return gh_paginate(f"repos/{REPO}/pulls?state=open&per_page=100")
+  ```
+
+#### 5. Run the Dashboard
+
+Execute the entry point script:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+python main.py
 ```
 
-#### 5. Open your Browser
-
-Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
-
-For detailed setup instructions, please refer to our [Installation Guide](./docs/INSTALL_GUIDE.md) (if you have one).
+The script will fetch the PRs, cluster them, generate the reports, and automatically open them in your default web browser:
+* `conflicts_tree.html` (Conflict DAG & merge sequencing)
+* `isolated_prs.html` (Independent, ready-to-merge PRs)
 
 ---
 
-## 📱 App Screenshots
+## 🗺️ Roadmap & Future Enhancements
 
-TODO: Add screenshots showcasing your application
+The long-term development of Pull Request Dashboard is divided into several milestones outlined in the [roadmap.md](./roadmap.md).
 
-|  |  |  |
-|---|---|---|
-| Screenshot 1 | Screenshot 2 | Screenshot 3 |
+---
+
+## 🛡️ Key Design Principles
+
+1. **Context-Grounded**: Always evaluate PRs against the project description, architectural rules, and Skills Core.
+2. **Merge Safety First**: Prioritize highlighting overlapping modifications and architectural conflict risks.
+3. **Local-First**: Keep codebase analysis, clustering, and reasoning offline using local Ollama models.
+4. **Actionable Recommendations**: Every conflict group must present a suggested merge order with clear reasoning.
 
 ---
 
@@ -258,10 +247,9 @@ Thank you for considering contributing to this project! Contributions are highly
 
 ## ✨ Maintainers
 
-TODO: Add maintainer information
+* [Karun Pacholi](https://github.com/kpj2006) - Lead Developer & Architect
+* [zahnentferner](https://github.com/Zahnentferner) - admin & reviewer
 
-- [Maintainer Name](https://github.com/username)
-- [Maintainer Name](https://github.com/username)
 
 ---
 
@@ -276,6 +264,6 @@ See the [LICENSE](LICENSE) file for details.
 
 Thanks a lot for spending your time helping TODO grow. Keep rocking 🥂
 
-[![Contributors](https://contrib.rocks/image?repo=AOSSIE-Org/TODO)](https://github.com/AOSSIE-Org/TODO/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=AOSSIE-Org/PullRequestDashboard)](https://github.com/AOSSIE-Org/PullRequestDashboard/graphs/contributors)
 
-© 2025 AOSSIE 
+© 2026 AOSSIE
