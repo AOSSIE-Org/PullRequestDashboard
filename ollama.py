@@ -1,20 +1,23 @@
 """
-ollama.py — Ollama interactions
+ollama.py — Ollama interactions with retry hardening
 Flow:
-  1. group_prs_pass()    — one combined call: all PR walkthroughs + repo context → groupings
+  1. group_prs_pass()    — one combined call: all PR walkthroughs + repo context -> groupings
   2. analyse_group()     — deep call per conflict group (all PRs in group together)
   3. analyse_single_pr() — for isolated PRs
 """
 
 import json, re, time
-import urllib.request
+import urllib.request, urllib.error
 
 OLLAMA_URL   = "http://localhost:11434/api/generate"
-OLLAMA_MODEL = "qwen2.5:7b"
+OLLAMA_MODEL = "llama3.2:latest"
 
-# ── Core call ─────────────────────────────────────────────────────────────────
+MAX_RETRIES   = 3
+BASE_DELAY    = 2   # seconds, doubles each retry
+REQUEST_TIMEOUT = 180  # seconds per attempt
 
-def _call(prompt, retries=2):
+
+def _call(prompt, retries=MAX_RETRIES):
     payload = json.dumps({
         "model": OLLAMA_MODEL,
         "prompt": prompt,
@@ -22,20 +25,24 @@ def _call(prompt, retries=2):
         "options": {"temperature": 0.1, "num_predict": 2000}
     }).encode("utf-8")
 
-    for attempt in range(retries):
+    for attempt in range(1, retries + 1):
         try:
             req = urllib.request.Request(
                 OLLAMA_URL, data=payload,
                 headers={"Content-Type": "application/json"}, method="POST"
             )
-            with urllib.request.urlopen(req, timeout=180) as resp:
+            with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
                 body = resp.read().decode("utf-8")
                 if not body.strip():
-                    print(f"    Empty response (attempt {attempt+1})")
+                    print(f"    Ollama empty body (attempt {attempt}/{retries})")
+                    if attempt < retries:
+                        time.sleep(BASE_DELAY * attempt)
                     continue
                 raw = json.loads(body).get("response", "").strip()
                 if not raw:
-                    print(f"    Empty .response (attempt {attempt+1})")
+                    print(f"    Ollama empty response field (attempt {attempt}/{retries})")
+                    if attempt < retries:
+                        time.sleep(BASE_DELAY * attempt)
                     continue
                 raw = re.sub(r"```json|```", "", raw).strip()
                 m = re.search(r"\{.*\}", raw, re.DOTALL)
@@ -43,11 +50,20 @@ def _call(prompt, retries=2):
                     return json.loads(m.group(0))
                 return json.loads(raw)
         except json.JSONDecodeError as e:
-            print(f"    JSON parse error (attempt {attempt+1}): {e}")
+            print(f"    Ollama JSON parse error (attempt {attempt}/{retries}): {e}")
+        except urllib.error.URLError as e:
+            print(f"    Ollama connection error (attempt {attempt}/{retries}): {e}")
+        except TimeoutError:
+            print(f"    Ollama timed out after {REQUEST_TIMEOUT}s (attempt {attempt}/{retries})")
         except Exception as e:
-            print(f"    Ollama error (attempt {attempt+1}): {e}")
-        time.sleep(2)
+            print(f"    Ollama error (attempt {attempt}/{retries}): {e}")
+        if attempt < retries:
+            delay = BASE_DELAY * attempt
+            print(f"    Retrying in {delay}s...")
+            time.sleep(delay)
+    print(f"    Ollama call failed after {retries} retries")
     return None
+
 
 def check_ollama():
     try:
@@ -56,13 +72,9 @@ def check_ollama():
     except Exception:
         return False
 
-# ── Step 2: Combined first-pass — all PRs in one call ────────────────────────
 
 def group_prs_pass(pr_data, repo_context=""):
-    """
-    Pass ALL PR walkthroughs + changes in one prompt.
-    Returns Ollama's grouping of which PRs solve the same problem.
-    """
+    """Pass ALL PR walkthroughs + changes in one prompt. Returns Ollama's grouping."""
     context_block = ""
     if repo_context:
         context_block = f"""== REPO CONTEXT ==
@@ -127,7 +139,6 @@ STRICT RULES:
                  "pr_numbers": [pr["number"]], "is_conflict": False}
                 for pr in pr_data]
 
-    # Strip hallucinated PR numbers
     cleaned = []
     hallucinated = []
     for g in result["groups"]:
@@ -143,7 +154,6 @@ STRICT RULES:
 
     return cleaned
 
-# ── Step 3: Deep analysis per conflict group ──────────────────────────────────
 
 def analyse_group(group_meta, prs_in_group, repo_context=""):
     """Deep analysis of a conflict group — all PRs passed together."""
@@ -191,7 +201,6 @@ Respond ONLY with a JSON object. No explanation. No markdown fences.
     result = _call(prompt)
     return result
 
-# ── Isolated PR analysis ──────────────────────────────────────────────────────
 
 def analyse_single_pr(pr, repo_context=""):
     context_block = f"Repo context:\n{repo_context[:800]}\n\n" if repo_context else ""
