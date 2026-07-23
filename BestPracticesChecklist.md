@@ -137,7 +137,7 @@
   - *Evidence URL:* https://github.com/AOSSIE-Org/PullRequestDashboard/blob/main/CONTRIBUTING.md#setup
 
 - [x] 🟡 **build_floss_tools** — The project can be built using only FLOSS tools.
-  - *Note:* Uses Python, pip, venv, and Ollama open-weights models.
+  - *Note:* Built and executed using FLOSS tools (Python, pip, venv, and Git).
 
 ### Automated Testing
 
