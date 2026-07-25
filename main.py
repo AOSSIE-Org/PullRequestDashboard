@@ -2,7 +2,7 @@
 main.py — entry point
 
 Flow:
-  1. Load context.md (repo context — what MiniChain is, what's already built)
+  1. Load complete target repo context from repos/<repo_name>/ via context.py
   2. Fetch all PRs + extract CodeRabbit walkthrough + changes only
   3. One combined Ollama call → groups PRs by problem
   4. Deep Ollama analysis per conflict group (all PRs in group together)
@@ -11,7 +11,7 @@ Flow:
 
 Run: python main.py
 Requires: gh (authenticated), ollama running on localhost:11434
-Optional: context.md in same folder (drop it in when ready)
+Context Sync: python scripts/update_subtrees.py (syncs target repo context into repos/<repo_name>/)
 """
 
 import os, time, webbrowser
@@ -19,19 +19,10 @@ from github   import fetch_prs, fetch_pr_files, fetch_coderabbit_sections, check
 from ollama   import check_ollama
 from grouping import resolve_groups
 from render   import build_conflict_html, build_isolated_html
+from context  import load_full_repo_context
 
-OUT_DIR      = os.path.dirname(os.path.abspath(__file__))
-CONTEXT_FILE = os.path.join(OUT_DIR, "context.md")
+OUT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-def load_context():
-    if os.path.exists(CONTEXT_FILE):
-        with open(CONTEXT_FILE, "r", encoding="utf-8") as f:
-            content = f.read().strip()
-        print(f"  Loaded context.md ({len(content)} chars)")
-        return content
-    print("  No context.md found — running without repo context")
-    print("  (Drop context.md in the same folder to enable it)")
-    return ""
 
 def main():
     if not check_gh_auth():
@@ -42,8 +33,9 @@ def main():
         print("ERROR: Ollama not reachable at localhost:11434")
         return
 
-    print(f"\nLoading repo context...")
-    repo_context = load_context()
+    target_repo_name = REPO.split("/")[-1]
+    print(f"\nLoading full repo context for '{target_repo_name}'...")
+    repo_context = load_full_repo_context(target_repo_name)
 
     print(f"\nFetching PRs for {REPO}...")
     raw_prs = fetch_prs()
