@@ -118,7 +118,7 @@ def prepare_deployment():
     # Clean up redundant docs/ folder if present
     docs_dir = os.path.join(ROOT_DIR, "docs")
     if os.path.exists(docs_dir):
-        shutil.rmtree(docs_dir, ignore_errors=True)
+        shutil.rmtree(docs_dir)
 
     print("Successfully prepared public/ as the sole deployment folder and removed redundant docs/ directory.")
 
