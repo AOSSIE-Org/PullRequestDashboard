@@ -19,13 +19,13 @@ SNAPSHOT_BANNER = """
         <span style="font-size:20px;background:rgba(255,255,255,0.2);padding:6px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center">&#128247;</span>
         <div>
             <span style="text-transform:uppercase;letter-spacing:0.6px;background:#ffffff;color:#1e40af;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:800;margin-right:8px;display:inline-block">Maintainer Snapshot</span>
-            <span style="font-weight:700;text-decoration:underline;text-underline-offset:3px">These are snapshot taken at that time.</span> Captured by maintainer for audience analysis &amp; interactive simulation.
+            <span style="font-weight:700;text-decoration:underline;text-underline-offset:3px">This is a snapshot taken at that time.</span> Captured by maintainer for audience analysis &amp; interactive simulation.
         </div>
     </div>
 """
 
 def add_banner_to_html(content):
-    if "These are snapshot taken at that time" not in content:
+    if "This is a snapshot taken at that time" not in content:
         return content.replace("<body>", f"<body>\n{SNAPSHOT_BANNER}")
     return content
 
