@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pull Request Simulation Dashboard — MiniChain</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f3f4f6;color:#111;padding:24px;max-width:1200px;margin:0 auto}
+  h1{font-size:24px;font-weight:800;margin-bottom:6px}
+  .sub{font-size:14px;color:#6b7280;margin-bottom:24px}
+  .nav-bar{display:flex;gap:12px;margin-bottom:24px}
+  .nav-link{padding:10px 18px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;color:#1d4ed8;font-weight:700;text-decoration:none;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+  .nav-link:hover{background:#eff6ff}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.05);display:flex;flex-direction:column;justify-content:space-between}
+  .card h2{font-size:18px;margin-bottom:10px;color:#111827}
+  .card p{font-size:13px;color:#4b5563;line-height:1.6;margin-bottom:20px}
+  .btn{display:inline-block;padding:10px 16px;background:#1d4ed8;color:#fff;font-weight:700;text-decoration:none;border-radius:6px;text-align:center}
+</style>
+</head>
+<body>
+
+
+    <div style="background:linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);color:#ffffff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;margin-bottom:24px;box-shadow:0 4px 12px rgba(30,64,175,0.25)">
+        <span style="font-size:20px;background:rgba(255,255,255,0.2);padding:6px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center">&#128247;</span>
+        <div>
+            <span style="text-transform:uppercase;letter-spacing:0.6px;background:#ffffff;color:#1e40af;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:800;margin-right:8px;display:inline-block">Maintainer Snapshot</span>
+            <span style="font-weight:700;text-decoration:underline;text-underline-offset:3px">These are snapshot taken at that time.</span> Captured by maintainer for audience analysis &amp; interactive simulation.
+        </div>
+    </div>
+
+
+<h1>Pull Request Simulation Dashboard</h1>
+<p class="sub">StabilityNexus/MiniChain &middot; Maintainer Interactive Simulation</p>
+
+<div class="nav-bar">
+  <a class="nav-link" href="conflicts_tree.html">⚡ PR Idea Conflicts View</a>
+  <a class="nav-link" href="isolated_prs.html">✅ Isolated PRs View</a>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div>
+      <span style="background:#fef2f2;color:#dc2626;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase;display:inline-block;margin-bottom:8px">Idea Conflicts</span>
+      <h2>PR Idea Conflicts Tree</h2>
+      <p>Interactive decision tree and head-to-head comparison for PRs solving identical problems.</p>
+    </div>
+    <a class="btn" href="conflicts_tree.html">Open Conflicts Simulation &rarr;</a>
+  </div>
+
+  <div class="card">
+    <div>
+      <span style="background:#f0fdf4;color:#166534;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase;display:inline-block;margin-bottom:8px">Isolated PRs</span>
+      <h2>Isolated Pull Requests</h2>
+      <p>Analysis of PRs solving standalone, non-overlapping problems with CodeRabbit review walkthroughs and risk assessments.</p>
+    </div>
+    <a class="btn" style="background:#059669" href="isolated_prs.html">Open Isolated PRs Simulation &rarr;</a>
+  </div>
+</div>
+
+</body>
+</html>

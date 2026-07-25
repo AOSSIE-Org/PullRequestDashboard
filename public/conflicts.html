@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PR Idea Conflicts &mdash; MiniChain</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f3f4f6;color:#111;padding:24px}
+  h1{font-size:22px;font-weight:800;margin-bottom:4px}
+  .sub{font-size:13px;color:#6b7280;margin-bottom:28px}
+  code{font-family:monospace;background:#f3f4f6;padding:1px 5px;border-radius:3px}
+  a{color:#1d4ed8} h4{color:#374151}
+</style>
+</head>
+<body>
+
+    <div style="background:linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);color:#ffffff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;margin-bottom:24px;box-shadow:0 4px 12px rgba(30,64,175,0.25)">
+        <span style="font-size:20px;background:rgba(255,255,255,0.2);padding:6px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center">&#128247;</span>
+        <div>
+            <span style="text-transform:uppercase;letter-spacing:0.6px;background:#ffffff;color:#1e40af;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:800;margin-right:8px;display:inline-block">Maintainer Snapshot</span>
+            <span style="font-weight:700;text-decoration:underline;text-underline-offset:3px">These are snapshot taken at that time.</span> Captured by maintainer for audience analysis &amp; interactive simulation.
+        </div>
+    </div>
+
+<h1>&#9889; PR Idea Conflict Analysis</h1>
+<p class="sub">StabilityNexus/MiniChain &middot; 25 Jul 2026 16:55 &middot; 1 conflict group(s)</p>
+
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;margin-bottom:32px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+                <span style="background:#dc2626;color:#fff;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700">IDEA CONFLICT</span>
+                <span style="background:#f3f4f6;color:#374151;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:600">Category: Persistence</span>
+                <span style="font-size:13px;color:#6b7280">2 PRs solving the same problem differently</span>
+            </div>
+            <div style="font-size:13px;color:#374151;padding:10px;background:#fffbeb;border-radius:6px;border-left:3px solid #f59e0b;margin-bottom:16px">
+                <strong>Shared problem:</strong> Blockchain state is lost on node restart
+            </div>
+            <svg viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg"
+     style="width:100%;max-width:900px;background:#0d1117;border-radius:12px;margin-bottom:8px">
+  <defs><marker id="a00" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1d4ed8"/></marker><marker id="a01" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#dc2626"/></marker><marker id="am0" markerWidth="8" markerHeight="6" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#8b5cf6"/></marker></defs>
+
+  <circle cx="80" cy="190" r="29" fill="#1f6feb" stroke="#388bfd" stroke-width="2.5"/>
+  <text x="80" y="185" text-anchor="middle" font-size="12" fill="white" font-weight="800">main</text>
+  <text x="80" y="199" text-anchor="middle" font-size="9" fill="#93c5fd">current</text>
+<rect x="790" y="10" width="100" height="22" rx="6" fill="#ef4444" opacity="0.2"/>
+<text x="840" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="#ef4444">CONFLICT</text>
+
+  <path d="M109,190 Q170,120 236,120"
+        fill="none" stroke="#1d4ed8" stroke-width="1.8" marker-end="url(#a00)"/>
+  <circle cx="260" cy="120" r="24" fill="#161b22" stroke="#1d4ed8" stroke-width="2.5"/>
+  <text x="260" y="113" text-anchor="middle" font-size="11" fill="#1d4ed8" font-weight="800">#85</text>
+  <text x="260" y="127" text-anchor="middle" font-size="9" fill="#8b949e">ALICE_DEV</text>
+  <rect x="288" y="106" width="160" height="28" rx="4" fill="#161b22" stroke="#30363d"/>
+  <text x="292" y="120" font-size="8" fill="#e6edf3">File-backed persistence for blockchain s</text>
+  <text x="292" y="132" font-size="7.5" fill="#22c55e">Risk: low</text>
+
+  <line x1="452" y1="120" x2="452" y2="120"
+        stroke="#1d4ed8" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a00)"/>
+  <circle cx="480" cy="120" r="22" fill="#1a1a2e" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="480" y="115" text-anchor="middle" font-size="8" fill="#1d4ed8" font-weight="700">after</text>
+  <text x="480" y="127" text-anchor="middle" font-size="8" fill="#1d4ed8">#85</text>
+  <rect x="508" y="104" width="155" height="32" rx="4" fill="#1a1a2e" stroke="#1d4ed8" stroke-opacity="0.4"/>
+  <text x="511" y="117" font-size="7.5" fill="#c9d1d9">Node state persists across application r</text>
+  <text x="511" y="130" font-size="7.5" fill="#c9d1d9">estarts sa</text>
+
+  <path d="M667,120 Q590,155 632,190"
+        fill="none" stroke="#1d4ed8" stroke-width="1.2" stroke-dasharray="4,4" opacity="0.6" marker-end="url(#am0)"/>
+
+  <path d="M109,190 Q170,260 236,260"
+        fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#a01)"/>
+  <circle cx="260" cy="260" r="24" fill="#161b22" stroke="#dc2626" stroke-width="2.5"/>
+  <text x="260" y="253" text-anchor="middle" font-size="11" fill="#dc2626" font-weight="800">#86</text>
+  <text x="260" y="267" text-anchor="middle" font-size="9" fill="#8b949e">BOB_CODER</text>
+  <rect x="288" y="246" width="160" height="28" rx="4" fill="#161b22" stroke="#30363d"/>
+  <text x="292" y="260" font-size="8" fill="#e6edf3">SQLite-backed block and transaction pers</text>
+  <text x="292" y="272" font-size="7.5" fill="#f59e0b">Risk: medium</text>
+
+  <line x1="452" y1="260" x2="452" y2="260"
+        stroke="#dc2626" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a01)"/>
+  <circle cx="480" cy="260" r="22" fill="#1a1a2e" stroke="#dc2626" stroke-width="2"/>
+  <text x="480" y="255" text-anchor="middle" font-size="8" fill="#dc2626" font-weight="700">after</text>
+  <text x="480" y="267" text-anchor="middle" font-size="8" fill="#dc2626">#86</text>
+  <rect x="508" y="244" width="155" height="32" rx="4" fill="#1a1a2e" stroke="#dc2626" stroke-opacity="0.4"/>
+  <text x="511" y="257" font-size="7.5" fill="#c9d1d9">Full relational DB persistence enabled f</text>
+  <text x="511" y="270" font-size="7.5" fill="#c9d1d9">or MiniCha</text>
+
+  <path d="M667,260 Q590,225 632,190"
+        fill="none" stroke="#dc2626" stroke-width="1.2" stroke-dasharray="4,4" opacity="0.6" marker-end="url(#am0)"/>
+
+  <circle cx="660" cy="190" r="30" fill="#1a0a2e" stroke="#8b5cf6" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <text x="660" y="182" text-anchor="middle" font-size="9" fill="#8b5cf6" font-weight="700">if both</text>
+  <text x="660" y="195" text-anchor="middle" font-size="8" fill="#a78bfa">merged</text>
+  <rect x="692" y="162" width="195" height="56" rx="6" fill="#1a0a2e" stroke="#8b5cf6" stroke-opacity="0.4"/>
+  <text x="696" y="176" font-size="7.5" fill="#a78bfa" font-weight="600">Sequence:</text>
+  <text x="696" y="190" font-size="7.5" fill="#c9d1d9">Merge PR #85 first for lightweight JSON persistence, th</text>
+  <text x="696" y="204" font-size="7.5" fill="#c9d1d9">PR #85 is lighter and aligns with MiniChain minimal edu</text>
+</svg>
+            
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:20px;margin-top:14px">
+                <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:12px;border-radius:0 8px 8px 0;margin-bottom:10px">
+                    <div style="font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;margin-bottom:4px">Why They Conflict</div>
+                    <div style="font-size:13px;color:#78350f">Both PR #85 (JSON file) and PR #86 (SQLite DB) solve state persistence by modifying persistence.py and chain lifecycle hooks differently.</div>
+                </div>
+                <div style="background:#f0fdf4;border-left:4px solid #22c55e;padding:12px;border-radius:0 8px 8px 0;margin-bottom:10px">
+                    <div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;margin-bottom:4px">Shared Goal</div>
+                    <div style="font-size:13px;color:#166534">Ensure node state and block history persist across node restarts.</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+                    <div style="background:#eff6ff;border-radius:8px;padding:10px">
+                        <div style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;margin-bottom:4px">Recommended Merge Sequence</div>
+                        <div style="font-size:12px;color:#1e3a5f">Merge PR #85 first for lightweight JSON persistence, then evaluate if SQLite indexing in PR #86 is required.</div>
+                    </div>
+                    <div style="background:#111827;border-radius:8px;padding:10px">
+                        <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:6px">&#129302; Recommendation</div>
+                        <div style="font-size:12px;color:#e5e7eb;line-height:1.5;margin-bottom:8px">PR #85 is lighter and aligns with MiniChain minimal educational design. Prefer PR #85.</div>
+                        <span style="background:#22c55e;color:#fff;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700">Prefer PR #85</span>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top:20px">
+                <div style="font-size:13px;font-weight:700;margin-bottom:12px">Full PR Details</div>
+                <div style="display:flex;gap:16px;flex-wrap:wrap"><div style="flex:1;min-width:340px">
+    <div style="border:2px solid #1d4ed8;border-radius:10px;padding:18px;background:#fff">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <a href="https://github.com/StabilityNexus/MiniChain/pull/85" target="_blank"
+               style="font-size:15px;font-weight:800;color:#1d4ed8;text-decoration:none">
+                PR #85 &mdash; fix: persist blockchain state to local file on node shutdown
+            </a>
+            <span style="background:#22c55e;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600">Low Risk</span>
+        </div>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:12px">
+            &#128100; <strong>ALICE_DEV</strong> &middot; 2026-05-20
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div style="background:#f9fafb;border-radius:8px;padding:12px">
+                <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px">Problem</div>
+                <div style="font-size:13px;color:#111">Blockchain state is lost whenever node restarts</div>
+            </div>
+            <div style="background:#f9fafb;border-radius:8px;padding:12px">
+                <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px">Approach</div>
+                <div style="font-size:13px;color:#111">Implements file-backed JSON state persistence with atomic file writes.</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px">What Changed</div>
+            <ul style='margin:6px 0 6px 18px'><li style="font-size:13px;color:#374151;margin-bottom:3px">Added save_chain/load_chain in persistence.py</li><li style="font-size:13px;color:#374151;margin-bottom:3px">Integrated save hooks in chain lifecycle</li></ul>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div style="background:#f0fdf4;border-radius:8px;padding:10px">
+                <div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;margin-bottom:4px">&#10003; Strengths</div>
+                <div style="font-size:13px;color:#374151">Simple and effective for local node runs</div>
+            </div>
+            <div style="background:#fef2f2;border-radius:8px;padding:10px">
+                <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;margin-bottom:4px">&#10007; Weaknesses</div>
+                <div style="font-size:13px;color:#374151">JSON format may scale poorly for high volume blocks</div>
+            </div>
+        </div>
+
+        <div style="background:#eff6ff;border-radius:8px;padding:10px;margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;margin-bottom:4px">&#128269; Outcome If Merged</div>
+            <div style="font-size:13px;color:#1e3a5f">Node state persists across application restarts safely</div>
+        </div>
+
+        <div style="margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px">&#10067; Open Questions for mentor</div>
+            <ul style='margin:6px 0 6px 18px'><li style="font-size:13px;color:#92400e;margin-bottom:3px">Should we optimize payload size with binary serialization later?</li></ul>
+        </div>
+
+        <div style="margin-bottom:10px"><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">persistence.py</span><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">chain.py</span><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">main.py</span></div>
+
+        <details style="margin-top:10px">
+            <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#6b7280">&#128048; CodeRabbit Walkthrough &amp; Changes</summary>
+            <div style="margin-top:10px;font-size:13px;line-height:1.7;max-height:360px;overflow-y:auto;
+                        border:1px solid #e5e7eb;border-radius:6px;padding:14px;color:#374151">
+                <p style='font-weight:700;color:#374151;margin-bottom:6px'>Walkthrough</p><p style='margin-bottom:6px'>Introduces persistence layer using json dumps and atomic renames to prevent state corruption.</p>
+<p style='font-weight:700;color:#374151;margin:10px 0 6px'>Changes</p><pre style='font-size:11px;white-space:pre-wrap;color:#374151;background:#f9fafb;padding:10px;border-radius:6px'>| File | Change |
+| --- | --- |
+| persistence.py | Added save_chain and load_chain |
+| chain.py | Integrated persistence trigger |</pre>
+            </div>
+        </details>
+    </div></div><div style="flex:1;min-width:340px">
+    <div style="border:2px solid #dc2626;border-radius:10px;padding:18px;background:#fff">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <a href="https://github.com/StabilityNexus/MiniChain/pull/86" target="_blank"
+               style="font-size:15px;font-weight:800;color:#dc2626;text-decoration:none">
+                PR #86 &mdash; feat: SQLite state database driver for persistent block storage
+            </a>
+            <span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600">Medium Risk</span>
+        </div>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:12px">
+            &#128100; <strong>BOB_CODER</strong> &middot; 2026-05-22
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div style="background:#f9fafb;border-radius:8px;padding:12px">
+                <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px">Problem</div>
+                <div style="font-size:13px;color:#111">Blockchain state is lost on restart and lacks fast block queries</div>
+            </div>
+            <div style="background:#f9fafb;border-radius:8px;padding:12px">
+                <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px">Approach</div>
+                <div style="font-size:13px;color:#111">Uses SQLite relational database tables for persistent block and transaction indexing.</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px">What Changed</div>
+            <ul style='margin:6px 0 6px 18px'><li style="font-size:13px;color:#374151;margin-bottom:3px">Created db.py with SQLite schemas</li><li style="font-size:13px;color:#374151;margin-bottom:3px">Refactored persistence layer to execute SQL queries</li></ul>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div style="background:#f0fdf4;border-radius:8px;padding:10px">
+                <div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;margin-bottom:4px">&#10003; Strengths</div>
+                <div style="font-size:13px;color:#374151">Fast SQL queries for transaction history</div>
+            </div>
+            <div style="background:#fef2f2;border-radius:8px;padding:10px">
+                <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;margin-bottom:4px">&#10007; Weaknesses</div>
+                <div style="font-size:13px;color:#374151">Adds binary database file dependency and extra migration complexity</div>
+            </div>
+        </div>
+
+        <div style="background:#eff6ff;border-radius:8px;padding:10px;margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;margin-bottom:4px">&#128269; Outcome If Merged</div>
+            <div style="font-size:13px;color:#1e3a5f">Full relational DB persistence enabled for MiniChain nodes</div>
+        </div>
+
+        <div style="margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px">&#10067; Open Questions for mentor</div>
+            <ul style='margin:6px 0 6px 18px'><li style="font-size:13px;color:#92400e;margin-bottom:3px">Is SQLite suitable for light edge nodes?</li></ul>
+        </div>
+
+        <div style="margin-bottom:10px"><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">persistence.py</span><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">db.py</span><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">chain.py</span></div>
+
+        <details style="margin-top:10px">
+            <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#6b7280">&#128048; CodeRabbit Walkthrough &amp; Changes</summary>
+            <div style="margin-top:10px;font-size:13px;line-height:1.7;max-height:360px;overflow-y:auto;
+                        border:1px solid #e5e7eb;border-radius:6px;padding:14px;color:#374151">
+                <p style='font-weight:700;color:#374151;margin-bottom:6px'>Walkthrough</p><p style='margin-bottom:6px'>Adds SQLite database connection, table schemas, and indexed transaction queries.</p>
+<p style='font-weight:700;color:#374151;margin:10px 0 6px'>Changes</p><pre style='font-size:11px;white-space:pre-wrap;color:#374151;background:#f9fafb;padding:10px;border-radius:6px'>| File | Change |
+| --- | --- |
+| db.py | SQLite schema initialization |
+| persistence.py | SQL query implementations |</pre>
+            </div>
+        </details>
+    </div></div></div>
+            </div>
+        </div>
+</body>
+</html>
