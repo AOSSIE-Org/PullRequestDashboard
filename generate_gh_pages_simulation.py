@@ -32,21 +32,19 @@ def add_banner_to_html(content):
 def prepare_deployment():
     # 1. Read exact root conflicts_tree.html
     conflicts_path = os.path.join(ROOT_DIR, "conflicts_tree.html")
-    if os.path.exists(conflicts_path):
-        with open(conflicts_path, "r", encoding="utf-8") as f:
-            conflicts_content = f.read()
-        conflicts_content = add_banner_to_html(conflicts_content)
-    else:
-        conflicts_content = "<h1>No conflicts_tree.html found</h1>"
+    if not os.path.exists(conflicts_path):
+        raise FileNotFoundError(f"Required HTML report not found: {conflicts_path}")
+    with open(conflicts_path, "r", encoding="utf-8") as f:
+        conflicts_content = f.read()
+    conflicts_content = add_banner_to_html(conflicts_content)
 
     # 2. Read exact root isolated_prs.html
     isolated_path = os.path.join(ROOT_DIR, "isolated_prs.html")
-    if os.path.exists(isolated_path):
-        with open(isolated_path, "r", encoding="utf-8") as f:
-            isolated_content = f.read()
-        isolated_content = add_banner_to_html(isolated_content)
-    else:
-        isolated_content = "<h1>No isolated_prs.html found</h1>"
+    if not os.path.exists(isolated_path):
+        raise FileNotFoundError(f"Required HTML report not found: {isolated_path}")
+    with open(isolated_path, "r", encoding="utf-8") as f:
+        isolated_content = f.read()
+    isolated_content = add_banner_to_html(isolated_content)
 
     # 3. Create index.html simulation hub
     index_content = f"""<!DOCTYPE html>
