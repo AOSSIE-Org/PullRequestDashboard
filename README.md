@@ -54,7 +54,7 @@
 
 **Pull Request Dashboard** (PR Dashboard) is a core module in the [AOSSIE Skills Ecosystem](https://github.com/AOSSIE-Org/skills). It is a local-first analysis tool designed to help project maintainers review incoming pull requests, identify semantic conflicts, analyze architectural gaps, and determine optimal merge sequences.
 
-By querying the GitHub API via the GitHub CLI (`gh`), fetching PR diffs and automated AI Bot Reviewer (e.g., CodeRabbit, Devin) walkthrough summaries, loading codebase context (`context.md`), embedding and clustering PRs with SentenceTransformer using `all-MiniLM-L6-v2` in `grouping.py`, and calling local Ollama models for deeper group and isolated-PR analyses, the tool generates a visual Conflict Directed Acyclic Graph (DAG) detailing merge reasoning and post-merge impacts.
+By querying the GitHub API via the GitHub CLI (`gh`), fetching PR diffs and automated AI Bot Reviewer (e.g., CodeRabbit, Devin) walkthrough summaries, dynamically scanning complete target repository context (`AGENTS.md` + `.agent/` files) from `repos/<repo_name>/` via `context.py`, embedding and clustering PRs with SentenceTransformer using `all-MiniLM-L6-v2` in `grouping.py`, and calling local Ollama models for deeper group and isolated-PR analyses, the tool generates a visual Conflict Directed Acyclic Graph (DAG) detailing merge reasoning and post-merge impacts.
 
 ---
 
@@ -98,7 +98,7 @@ flowchart TD
 
 
 1. **Pull Request Fetching**: The dashboard connects to GitHub via `gh` to retrieve open/closed PRs, modified files, and AI Bot Reviewer (e.g., CodeRabbit, Devin) summaries.
-2. **Context-Grounded Reasoning**: It reads the local repository context (`context.md`) and the global/per-repo skills from the Skills Core to evaluate PRs against the project rules.
+2. **Context-Grounded Reasoning**: It dynamically scans the target repository's complete context (`AGENTS.md`, `.agent/info/operational-data.md`, `.agent/core/*.md`, `.agent/instructions/*.md`) from `repos/<repo_name>/` via `context.py` to evaluate PRs against the project rules.
 3. **DAG Generation**: It renders an interactive Conflict DAG illustrating PR dependency relationships, suggested merge sequences, and post-merge impact.
 4. **Gap Logging**: If the dashboard identifies any architectural gaps or changes not covered in the current skills context, it logs them to `gap_log.json` to be consumed by the [Skill Updater](https://github.com/kpj2006/skill-updater).
 
@@ -171,18 +171,20 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### 3. Setup Context File
+#### 3. Synchronize Target Repository Context
 
-Ensure you have a `context.md` file detailing the repository architecture inside the dashboard folder (a default context file for [MiniChain](https://github.com/StabilityNexus/MiniChain) is provided as `context.md`).
+Run the context sync script to automatically fetch and populate all `.agent` and `AGENTS.md` context files into `repos/<repo_name>/`:
+
+```bash
+python scripts/update_subtrees.py
+```
 
 #### 4. Configuration
-
-All configuration settings are defined at the top of each script file—no `.env` file is required.
 
 * **`github.py`** — Set the target repository:
   
   ```python
-  REPO = "StabilityNexus/MiniChain"  # ← Change to your repository
+  REPO = "kpj2006/SocialShareButton"  # ← Change to your target repository
   ```
 
 * **`grouping.py`** — Tune the clustering sensitivity:
