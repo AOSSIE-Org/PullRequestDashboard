@@ -341,6 +341,7 @@ def _html_page(title, h1, subtitle, body, bg="#f3f4f6"):
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title} &mdash; MiniChain</title>
 <style>
   *{{box-sizing:border-box;margin:0;padding:0}}

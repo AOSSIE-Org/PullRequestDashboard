@@ -514,6 +514,7 @@ def build_conflict_html(groups):
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PR Idea Conflicts — MiniChain</title>
 <style>
   *{{box-sizing:border-box;margin:0;padding:0}}
@@ -550,6 +551,7 @@ def build_isolated_html(isolated):
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Isolated PRs — MiniChain</title>
 <style>
   *{{box-sizing:border-box;margin:0;padding:0}}
