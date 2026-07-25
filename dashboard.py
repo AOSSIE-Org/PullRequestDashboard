@@ -488,7 +488,7 @@ def build_conflict_html(groups):
         pr_details = ""
         for i, pr in enumerate(prs):
             col = pr_colors[i % len(pr_colors)]
-            pr_details += f'<div style="flex:1;min-width:340px">{pr_detail_block(pr, col)}</div>'
+            pr_details += f'<div class="pr-col">{pr_detail_block(pr, col)}</div>'
 
         sections.append(f"""
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;margin-bottom:32px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
@@ -504,7 +504,7 @@ def build_conflict_html(groups):
             {comp_cards}
             <div style="margin-top:20px">
                 <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px">Full PR Details</div>
-                <div style="display:flex;gap:16px;flex-wrap:wrap">{pr_details}</div>
+                <div class="pr-columns">{pr_details}</div>
             </div>
         </div>""")
 
@@ -524,6 +524,9 @@ def build_conflict_html(groups):
   code{{font-family:monospace;background:#f3f4f6;padding:1px 5px;border-radius:3px}}
   a{{color:#1d4ed8}}
   h4{{color:#374151}}
+  .pr-columns{{display:flex;gap:16px;flex-wrap:wrap}}
+  .pr-col{{flex:1;min-width:0}}
+  @media(max-width:768px){{.pr-columns{{flex-direction:column}}}}
 </style>
 </head>
 <body>

@@ -11,6 +11,9 @@
   .sub{font-size:13px;color:#6b7280;margin-bottom:28px}
   code{font-family:monospace;background:#f3f4f6;padding:1px 5px;border-radius:3px}
   a{color:#1d4ed8} h4{color:#374151}
+  .pr-columns{display:flex;gap:16px;flex-wrap:wrap}
+  .pr-col{flex:1;min-width:0}
+  @media(max-width:768px){.pr-columns{flex-direction:column}}
 </style>
 </head>
 <body>
@@ -54,7 +57,7 @@
   <text x="292" y="120" font-size="8" fill="#e6edf3">File-backed persistence for blockchain s</text>
   <text x="292" y="132" font-size="7.5" fill="#22c55e">Risk: low</text>
 
-  <line x1="452" y1="120" x2="452" y2="120"
+  <line x1="448" y1="120" x2="456" y2="120"
         stroke="#1d4ed8" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a00)"/>
   <circle cx="480" cy="120" r="22" fill="#1a1a2e" stroke="#1d4ed8" stroke-width="2"/>
   <text x="480" y="115" text-anchor="middle" font-size="8" fill="#1d4ed8" font-weight="700">after</text>
@@ -75,7 +78,7 @@
   <text x="292" y="260" font-size="8" fill="#e6edf3">SQLite-backed block and transaction pers</text>
   <text x="292" y="272" font-size="7.5" fill="#f59e0b">Risk: medium</text>
 
-  <line x1="452" y1="260" x2="452" y2="260"
+  <line x1="448" y1="260" x2="456" y2="260"
         stroke="#dc2626" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a01)"/>
   <circle cx="480" cy="260" r="22" fill="#1a1a2e" stroke="#dc2626" stroke-width="2"/>
   <text x="480" y="255" text-anchor="middle" font-size="8" fill="#dc2626" font-weight="700">after</text>
@@ -119,7 +122,7 @@
             </div>
             <div style="margin-top:20px">
                 <div style="font-size:13px;font-weight:700;margin-bottom:12px">Full PR Details</div>
-                <div style="display:flex;gap:16px;flex-wrap:wrap"><div style="flex:1;min-width:340px">
+                <div class="pr-columns"><div class="pr-col">
     <div style="border:2px solid #1d4ed8;border-radius:10px;padding:18px;background:#fff">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
             <a href="https://github.com/StabilityNexus/MiniChain/pull/85" target="_blank"
@@ -182,7 +185,7 @@
 | chain.py | Integrated persistence trigger |</pre>
             </div>
         </details>
-    </div></div><div style="flex:1;min-width:340px">
+    </div></div><div class="pr-col">
     <div style="border:2px solid #dc2626;border-radius:10px;padding:18px;background:#fff">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
             <a href="https://github.com/StabilityNexus/MiniChain/pull/86" target="_blank"
