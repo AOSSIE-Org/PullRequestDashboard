@@ -297,7 +297,7 @@ def pr_detail_block(pr, highlight_color="#1d4ed8"):
     return f"""
     <div style="border:2px solid {highlight_color};border-radius:10px;padding:18px;background:#fff">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-            <a href="https://github.com/{REPO}/pull/{pr['number']}" target="_blank"
+            <a href="https://github.com/{REPO}/pull/{pr['number']}" target="_blank" rel="noopener noreferrer"
                style="font-size:15px;font-weight:800;color:{highlight_color};text-decoration:none">
                 PR #{pr['number']} &mdash; {e(pr['title'])}
             </a>

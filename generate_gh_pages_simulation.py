@@ -7,6 +7,7 @@ attaching the Maintainer Snapshot Notice, and creating `public/index.html`.
 """
 
 import os
+import re
 import shutil
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -26,7 +27,10 @@ SNAPSHOT_BANNER = """
 
 def add_banner_to_html(content):
     if "This is a snapshot taken at that time" not in content:
-        return content.replace("<body>", f"<body>\n{SNAPSHOT_BANNER}")
+        match = re.search(r"<body\b[^>]*>", content, re.IGNORECASE)
+        if not match:
+            raise ValueError("No opening <body> tag found in HTML content")
+        return content[:match.end()] + f"\n{SNAPSHOT_BANNER}" + content[match.end():]
     return content
 
 def prepare_deployment():
