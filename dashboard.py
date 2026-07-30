@@ -297,7 +297,7 @@ def pr_detail_block(pr, highlight_color="#1d4ed8"):
     return f"""
     <div style="border:2px solid {highlight_color};border-radius:10px;padding:18px;background:#fff">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-            <a href="https://github.com/{REPO}/pull/{pr['number']}" target="_blank"
+            <a href="https://github.com/{REPO}/pull/{pr['number']}" target="_blank" rel="noopener noreferrer"
                style="font-size:15px;font-weight:800;color:{highlight_color};text-decoration:none">
                 PR #{pr['number']} &mdash; {e(pr['title'])}
             </a>
@@ -488,7 +488,7 @@ def build_conflict_html(groups):
         pr_details = ""
         for i, pr in enumerate(prs):
             col = pr_colors[i % len(pr_colors)]
-            pr_details += f'<div style="flex:1;min-width:340px">{pr_detail_block(pr, col)}</div>'
+            pr_details += f'<div class="pr-col">{pr_detail_block(pr, col)}</div>'
 
         sections.append(f"""
         <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;margin-bottom:32px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
@@ -504,7 +504,7 @@ def build_conflict_html(groups):
             {comp_cards}
             <div style="margin-top:20px">
                 <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px">Full PR Details</div>
-                <div style="display:flex;gap:16px;flex-wrap:wrap">{pr_details}</div>
+                <div class="pr-columns">{pr_details}</div>
             </div>
         </div>""")
 
@@ -514,6 +514,7 @@ def build_conflict_html(groups):
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PR Idea Conflicts — MiniChain</title>
 <style>
   *{{box-sizing:border-box;margin:0;padding:0}}
@@ -523,6 +524,9 @@ def build_conflict_html(groups):
   code{{font-family:monospace;background:#f3f4f6;padding:1px 5px;border-radius:3px}}
   a{{color:#1d4ed8}}
   h4{{color:#374151}}
+  .pr-columns{{display:flex;gap:16px;flex-wrap:wrap}}
+  .pr-col{{flex:1;min-width:0}}
+  @media(max-width:768px){{.pr-columns{{flex-direction:column}}}}
 </style>
 </head>
 <body>
@@ -550,6 +554,7 @@ def build_isolated_html(isolated):
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Isolated PRs — MiniChain</title>
 <style>
   *{{box-sizing:border-box;margin:0;padding:0}}
