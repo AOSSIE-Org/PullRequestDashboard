@@ -33,21 +33,40 @@ def add_banner_to_html(content):
         return content[:match.end()] + f"\n{SNAPSHOT_BANNER}" + content[match.end():]
     return content
 
+def load_html_report(filename_candidates):
+    for candidate in filename_candidates:
+        if os.path.exists(candidate):
+            with open(candidate, "r", encoding="utf-8") as f:
+                return f.read()
+    return None
+
 def prepare_deployment():
-    # 1. Read exact root conflicts_tree.html
-    conflicts_path = os.path.join(ROOT_DIR, "conflicts_tree.html")
-    if not os.path.exists(conflicts_path):
-        raise FileNotFoundError(f"Required HTML report not found: {conflicts_path}")
-    with open(conflicts_path, "r", encoding="utf-8") as f:
-        conflicts_content = f.read()
+    # 1. Read conflicts tree HTML (checks root and public directory fallbacks)
+    conflicts_candidates = [
+        os.path.join(ROOT_DIR, "conflicts_tree.html"),
+        os.path.join(ROOT_DIR, "conflicts.html"),
+        os.path.join(PUBLIC_DIR, "conflicts_tree.html"),
+        os.path.join(PUBLIC_DIR, "conflicts.html"),
+    ]
+    conflicts_content = load_html_report(conflicts_candidates)
+    if not conflicts_content:
+        raise FileNotFoundError(
+            f"Required conflicts HTML report not found in root or public directory. Checked: {conflicts_candidates}"
+        )
     conflicts_content = add_banner_to_html(conflicts_content)
 
-    # 2. Read exact root isolated_prs.html
-    isolated_path = os.path.join(ROOT_DIR, "isolated_prs.html")
-    if not os.path.exists(isolated_path):
-        raise FileNotFoundError(f"Required HTML report not found: {isolated_path}")
-    with open(isolated_path, "r", encoding="utf-8") as f:
-        isolated_content = f.read()
+    # 2. Read isolated PRs HTML (checks root and public directory fallbacks)
+    isolated_candidates = [
+        os.path.join(ROOT_DIR, "isolated_prs.html"),
+        os.path.join(ROOT_DIR, "isolated.html"),
+        os.path.join(PUBLIC_DIR, "isolated_prs.html"),
+        os.path.join(PUBLIC_DIR, "isolated.html"),
+    ]
+    isolated_content = load_html_report(isolated_candidates)
+    if not isolated_content:
+        raise FileNotFoundError(
+            f"Required isolated PRs HTML report not found in root or public directory. Checked: {isolated_candidates}"
+        )
     isolated_content = add_banner_to_html(isolated_content)
 
     # 3. Create index.html simulation hub
