@@ -107,10 +107,14 @@ def prepare_deployment():
 </body>
 </html>"""
 
-    # Write exact files to public/ only
+    # Write exact files to public/
     with open(os.path.join(PUBLIC_DIR, "conflicts_tree.html"), "w", encoding="utf-8") as f:
         f.write(conflicts_content)
+    with open(os.path.join(PUBLIC_DIR, "conflicts.html"), "w", encoding="utf-8") as f:
+        f.write(conflicts_content)
     with open(os.path.join(PUBLIC_DIR, "isolated_prs.html"), "w", encoding="utf-8") as f:
+        f.write(isolated_content)
+    with open(os.path.join(PUBLIC_DIR, "isolated.html"), "w", encoding="utf-8") as f:
         f.write(isolated_content)
     with open(os.path.join(PUBLIC_DIR, "index.html"), "w", encoding="utf-8") as f:
         f.write(index_content)
