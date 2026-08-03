@@ -36,7 +36,7 @@ jobs:
           python generate_gh_pages_simulation.py
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
