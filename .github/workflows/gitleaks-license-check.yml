@@ -1,0 +1,67 @@
+name: gitleaks-license-check
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+jobs:
+  check-secret:
+    name: Check GITLEAKS_LICENSE secret status
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump trigger/context info
+        run: |
+          echo "## Context" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "- event_name: ${{ github.event_name }}"
+            echo "- repository: ${{ github.repository }}"
+            echo "- repository_owner: ${{ github.repository_owner }}"
+            echo "- ref: ${{ github.ref }}"
+            echo "- actor: ${{ github.actor }}"
+            echo "- workflow: ${{ github.workflow }}"
+            echo "- run_id: ${{ github.run_id }}"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Check if triggered from a fork (forks never receive secrets)
+        if: github.event_name == 'pull_request'
+        run: |
+          BASE_REPO="${{ github.repository }}"
+          HEAD_REPO="${{ github.event.pull_request.head.repo.full_name }}"
+          echo "- base repo: $BASE_REPO" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "- head repo: $HEAD_REPO" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$BASE_REPO" != "$HEAD_REPO" ]; then
+            echo "⚠️ This PR comes from a fork ($HEAD_REPO). GitHub never exposes repo/org secrets to pull_request runs from forks, regardless of secret configuration. Use pull_request_target or check on push/workflow_dispatch instead." | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "PR head repo matches base repo — not a fork, secrets should be available if configured correctly." | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Verify GITLEAKS_LICENSE is accessible
+        env:
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+        run: |
+          if [ -z "$GITLEAKS_LICENSE" ]; then
+            echo "❌ GITLEAKS_LICENSE secret is NOT set or not accessible to this workflow/repo." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "" | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "Common causes:" | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "1. The org secret's 'Repository access' list doesn't include this repo (Settings > Secrets and variables > Actions > Organization secrets)." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "2. The secret is defined at the Environment level, but this job doesn't declare that environment (jobs.<job>.environment)." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "3. A repo-level secret with the SAME name exists but is empty, shadowing/confusing the org one (repo-level always wins over org-level)." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "4. Actions permissions policy for the org/repo restricts secret access (Settings > Actions > General > Access)." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "5. Typo/case mismatch in the secret name (names are case-sensitive)." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          RAW_LEN=${#GITLEAKS_LICENSE}
+          TRIMMED=$(printf '%s' "$GITLEAKS_LICENSE" | xargs)
+          TRIMMED_LEN=${#TRIMMED}
+
+          echo "✅ GITLEAKS_LICENSE secret is set and accessible." | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "- Raw length: $RAW_LEN characters" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "- Trimmed length: $TRIMMED_LEN characters" | tee -a "$GITHUB_STEP_SUMMARY"
+
+          if [ "$RAW_LEN" -ne "$TRIMMED_LEN" ]; then
+            echo "⚠️ Leading/trailing whitespace or a newline detected in the secret value. Re-paste it into the secret field without extra spaces/newlines." | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Repo-level secret shadow check
+        run: |
+          echo "Note: GitHub Actions cannot distinguish an org-level vs repo-level secret from within a workflow — 'secrets.GITLEAKS_LICENSE' always resolves to whichever one currently applies (repo-level takes precedence if both exist with the same name). If the check above failed, also verify there is no empty repo-level secret with this exact name overriding the org one." | tee -a "$GITHUB_STEP_SUMMARY"
