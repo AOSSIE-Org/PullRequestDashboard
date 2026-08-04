@@ -59,7 +59,7 @@ def pr_detail_block(pr, color="#1d4ed8"):
     return f"""
     <div style="border:2px solid {color};border-radius:10px;padding:18px;background:#fff">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-            <a href="https://github.com/{REPO}/pull/{pr['number']}" target="_blank"
+            <a href="https://github.com/{REPO}/pull/{pr['number']}" target="_blank" rel="noopener noreferrer"
                style="font-size:15px;font-weight:800;color:{color};text-decoration:none">
                 PR #{pr['number']} &mdash; {e(pr['title'])}
             </a>
@@ -225,7 +225,7 @@ def _svg_tree(group, gi):
 
             # PR node → its own outcome node
             svg.append(f'''
-  <line x1="{BX+NR+168}" y1="{y}" x2="{OX-NR-4}" y2="{y}"
+  <line x1="{BX+NR+164}" y1="{y}" x2="{OX-NR}" y2="{y}"
         stroke="{col}" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a{gi}{i})"/>
   <circle cx="{OX}" cy="{y}" r="{NR-2}" fill="#1a1a2e" stroke="{col}" stroke-width="2"/>
   <text x="{OX}" y="{y-5}" text-anchor="middle" font-size="8" fill="{col}" font-weight="700">after</text>
@@ -298,7 +298,7 @@ def build_conflict_html(groups):
             </div>"""
 
         pr_details = "".join(
-            f'<div style="flex:1;min-width:340px">{pr_detail_block(pr, PR_COLORS[i % len(PR_COLORS)])}</div>'
+            f'<div class="pr-col">{pr_detail_block(pr, PR_COLORS[i % len(PR_COLORS)])}</div>'
             for i, pr in enumerate(prs)
         )
 
@@ -316,7 +316,7 @@ def build_conflict_html(groups):
             {comp_cards}
             <div style="margin-top:20px">
                 <div style="font-size:13px;font-weight:700;margin-bottom:12px">Full PR Details</div>
-                <div style="display:flex;gap:16px;flex-wrap:wrap">{pr_details}</div>
+                <div class="pr-columns">{pr_details}</div>
             </div>
         </div>""")
 
@@ -341,6 +341,7 @@ def _html_page(title, h1, subtitle, body, bg="#f3f4f6"):
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title} &mdash; MiniChain</title>
 <style>
   *{{box-sizing:border-box;margin:0;padding:0}}
@@ -349,6 +350,9 @@ def _html_page(title, h1, subtitle, body, bg="#f3f4f6"):
   .sub{{font-size:13px;color:#6b7280;margin-bottom:28px}}
   code{{font-family:monospace;background:#f3f4f6;padding:1px 5px;border-radius:3px}}
   a{{color:#1d4ed8}} h4{{color:#374151}}
+  .pr-columns{{display:flex;gap:16px;flex-wrap:wrap}}
+  .pr-col{{flex:1;min-width:0}}
+  @media(max-width:768px){{.pr-columns{{flex-direction:column}}}}
 </style>
 </head>
 <body>

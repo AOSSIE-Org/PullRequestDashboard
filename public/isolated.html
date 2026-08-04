@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Isolated PRs &mdash; MiniChain</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f3f4f6;color:#111;padding:24px}
+  h1{font-size:22px;font-weight:800;margin-bottom:4px}
+  .sub{font-size:13px;color:#6b7280;margin-bottom:28px}
+  code{font-family:monospace;background:#f3f4f6;padding:1px 5px;border-radius:3px}
+  a{color:#1d4ed8} h4{color:#374151}
+</style>
+</head>
+<body>
+
+    <div style="background:linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);color:#ffffff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;margin-bottom:24px;box-shadow:0 4px 12px rgba(30,64,175,0.25)">
+        <span style="font-size:20px;background:rgba(255,255,255,0.2);padding:6px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center">&#128247;</span>
+        <div>
+            <span style="text-transform:uppercase;letter-spacing:0.6px;background:#ffffff;color:#1e40af;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:800;margin-right:8px;display:inline-block">Maintainer Snapshot</span>
+            <span style="font-weight:700;text-decoration:underline;text-underline-offset:3px">This is a snapshot taken at that time.</span> Captured by maintainer for audience analysis &amp; interactive simulation.
+        </div>
+    </div>
+
+
+    <div style="background:linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);color:#ffffff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;margin-bottom:24px;box-shadow:0 4px 12px rgba(30,64,175,0.25)">
+        <span style="font-size:20px;background:rgba(255,255,255,0.2);padding:6px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center">&#128247;</span>
+        <div>
+            <span style="text-transform:uppercase;letter-spacing:0.6px;background:#ffffff;color:#1e40af;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:800;margin-right:8px;display:inline-block">Maintainer Snapshot</span>
+            <span style="font-weight:700;text-decoration:underline;text-underline-offset:3px">These are snapshot taken at that time.</span> Captured by maintainer for audience analysis &amp; interactive simulation.
+        </div>
+    </div>
+
+<h1>&#9989; Isolated PRs &mdash; Unique Problems</h1>
+<p class="sub">StabilityNexus/MiniChain &middot; 25 Jul 2026 16:55 &middot; 3 PR(s)</p>
+<div style="margin-bottom:20px">
+    <div style="border:2px solid #1d4ed8;border-radius:10px;padding:18px;background:#fff">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <a href="https://github.com/StabilityNexus/MiniChain/pull/87" target="_blank" rel="noopener noreferrer"
+               style="font-size:15px;font-weight:800;color:#1d4ed8;text-decoration:none">
+                PR #87 &mdash; feat: implement external genesis configuration support
+            </a>
+            <span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600">Medium Risk</span>
+        </div>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:12px">
+            &#128100; <strong>SIDDHANTCOOKIE</strong> &middot; 2026-05-27
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div style="background:#f9fafb;border-radius:8px;padding:12px">
+                <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px">Problem</div>
+                <div style="font-size:13px;color:#111">Hardcoded genesis block parameters restrict network configurability across environments.</div>
+            </div>
+            <div style="background:#f9fafb;border-radius:8px;padding:12px">
+                <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px">Approach</div>
+                <div style="font-size:13px;color:#111">Implements JSON-driven genesis loader and dynamic state allocation verification.</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px">What Changed</div>
+            <ul style='margin:6px 0 6px 18px'><li style="font-size:13px;color:#374151;margin-bottom:3px">Added genesis.json config</li><li style="font-size:13px;color:#374151;margin-bottom:3px">Refactored Blockchain.__init__ to load external genesis</li><li style="font-size:13px;color:#374151;margin-bottom:3px">Validated genesis hash in persistence.py</li></ul>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div style="background:#f0fdf4;border-radius:8px;padding:10px">
+                <div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;margin-bottom:4px">&#10003; Strengths</div>
+                <div style="font-size:13px;color:#374151">Enables custom network deployments and multi-chain testing configurations without hardcoding.</div>
+            </div>
+            <div style="background:#fef2f2;border-radius:8px;padding:10px">
+                <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;margin-bottom:4px">&#10007; Weaknesses</div>
+                <div style="font-size:13px;color:#374151">Requires filesystem access to genesis.json on node startup.</div>
+            </div>
+        </div>
+
+        <div style="background:#eff6ff;border-radius:8px;padding:10px;margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;margin-bottom:4px">&#128269; Outcome If Merged</div>
+            <div style="font-size:13px;color:#1e3a5f">Nodes can boot with customized genesis states and pre-allocated account balances safely.</div>
+        </div>
+
+        <div style="margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px">&#10067; Open Questions for mentor</div>
+            <ul style='margin:6px 0 6px 18px'><li style="font-size:13px;color:#92400e;margin-bottom:3px">Should default genesis parameters be embedded as a fallback when genesis.json is missing?</li></ul>
+        </div>
+
+        <div style="margin-bottom:10px"><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">genesis.json</span><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">minichain/chain.py</span><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">minichain/persistence.py</span><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">tests/test_persistence.py</span></div>
+
+        <details style="margin-top:10px">
+            <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#6b7280">&#128048; CodeRabbit Walkthrough &amp; Changes</summary>
+            <div style="margin-top:10px;font-size:13px;line-height:1.7;max-height:360px;overflow-y:auto;
+                        border:1px solid #e5e7eb;border-radius:6px;padding:14px;color:#374151">
+                <p style='font-weight:700;color:#374151;margin-bottom:6px'>Walkthrough</p><p style='margin-bottom:6px'>Adds a filesystem-backed genesis.json and refactors minichain/chain.py to load and apply genesis metadata and allocations; persistence now recomputes/verifies the genesis hash; tests updated to assert the computed genesis hash.</p>
+<p style='font-weight:700;color:#374151;margin:10px 0 6px'>Changes</p><pre style='font-size:11px;white-space:pre-wrap;color:#374151;background:#f9fafb;padding:10px;border-radius:6px'>**Genesis Block Configurability**
+
+|Layer / File(s)|Summary|
+|---|---|
+|genesis.json|Defines chain_id, timestamp, difficulty, and alloc balances.|
+|minichain/chain.py|Loads JSON, applies alloc to State, sets timestamp/difficulty.|
+|minichain/persistence.py|Recomputes and verifies genesis hash.|</pre>
+            </div>
+        </details>
+    </div></div><div style="margin-bottom:20px">
+    <div style="border:2px solid #1d4ed8;border-radius:10px;padding:18px;background:#fff">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <a href="https://github.com/StabilityNexus/MiniChain/pull/88" target="_blank" rel="noopener noreferrer"
+               style="font-size:15px;font-weight:800;color:#1d4ed8;text-decoration:none">
+                PR #88 &mdash; feat: implement Merkle Patricia Trie for state verification
+            </a>
+            <span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600">Medium Risk</span>
+        </div>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:12px">
+            &#128100; <strong>SIDDHANTCOOKIE</strong> &middot; 2026-05-29
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div style="background:#f9fafb;border-radius:8px;padding:12px">
+                <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px">Problem</div>
+                <div style="font-size:13px;color:#111">Flat key-value state storage cannot generate lightweight cryptographic proofs of state integrity.</div>
+            </div>
+            <div style="background:#f9fafb;border-radius:8px;padding:12px">
+                <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px">Approach</div>
+                <div style="font-size:13px;color:#111">Introduces a Merkle Patricia Trie (MPT) in minichain/trie.py to calculate root state hashes after transaction execution.</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px">What Changed</div>
+            <ul style='margin:6px 0 6px 18px'><li style="font-size:13px;color:#374151;margin-bottom:3px">Created minichain/trie.py implementing branch, extension, and leaf nodes</li><li style="font-size:13px;color:#374151;margin-bottom:3px">Integrated state root hash calculation into minichain/state.py</li><li style="font-size:13px;color:#374151;margin-bottom:3px">Added unit test suite in tests/test_trie.py</li></ul>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div style="background:#f0fdf4;border-radius:8px;padding:10px">
+                <div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;margin-bottom:4px">&#10003; Strengths</div>
+                <div style="font-size:13px;color:#374151">Provides Ethereum-compatible state root hashing for light client verification.</div>
+            </div>
+            <div style="background:#fef2f2;border-radius:8px;padding:10px">
+                <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;margin-bottom:4px">&#10007; Weaknesses</div>
+                <div style="font-size:13px;color:#374151">Slightly increases state mutation latency due to trie node re-keying on every transaction.</div>
+            </div>
+        </div>
+
+        <div style="background:#eff6ff;border-radius:8px;padding:10px;margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;margin-bottom:4px">&#128269; Outcome If Merged</div>
+            <div style="font-size:13px;color:#1e3a5f">Block headers store verifiable Merkle state root hashes for instant state auditing.</div>
+        </div>
+
+        <div style="margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px">&#10067; Open Questions for mentor</div>
+            <ul style='margin:6px 0 6px 18px'><li style="font-size:13px;color:#92400e;margin-bottom:3px">Do we need state trie pruning to prevent memory growth over long chain runs?</li></ul>
+        </div>
+
+        <div style="margin-bottom:10px"><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">minichain/trie.py</span><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">minichain/state.py</span><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">tests/test_trie.py</span></div>
+
+        <details style="margin-top:10px">
+            <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#6b7280">&#128048; CodeRabbit Walkthrough &amp; Changes</summary>
+            <div style="margin-top:10px;font-size:13px;line-height:1.7;max-height:360px;overflow-y:auto;
+                        border:1px solid #e5e7eb;border-radius:6px;padding:14px;color:#374151">
+                <p style='font-weight:700;color:#374151;margin-bottom:6px'>Walkthrough</p><p style='margin-bottom:6px'>Implements Merkle Patricia Trie structure with trie root calculation integrated directly into state updates.</p>
+<p style='font-weight:700;color:#374151;margin:10px 0 6px'>Changes</p><pre style='font-size:11px;white-space:pre-wrap;color:#374151;background:#f9fafb;padding:10px;border-radius:6px'>**Merkle Patricia Trie Integration**
+
+|Layer / File(s)|Summary|
+|---|---|
+|minichain/trie.py|Implements MPT branch, extension, and leaf nodes.|
+|minichain/state.py|Calculates state root hash after transaction execution.|</pre>
+            </div>
+        </details>
+    </div></div><div style="margin-bottom:20px">
+    <div style="border:2px solid #1d4ed8;border-radius:10px;padding:18px;background:#fff">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <a href="https://github.com/StabilityNexus/MiniChain/pull/89" target="_blank" rel="noopener noreferrer"
+               style="font-size:15px;font-weight:800;color:#1d4ed8;text-decoration:none">
+                PR #89 &mdash; feat: async WebSocket P2P node discovery &amp; transaction relay
+            </a>
+            <span style="background:#22c55e;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600">Low Risk</span>
+        </div>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:12px">
+            &#128100; <strong>DEV_GURU</strong> &middot; 2026-06-02
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div style="background:#f9fafb;border-radius:8px;padding:12px">
+                <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px">Problem</div>
+                <div style="font-size:13px;color:#111">Synchronous TCP socket networking blocks on connection attempts and drops peers during network spikes.</div>
+            </div>
+            <div style="background:#f9fafb;border-radius:8px;padding:12px">
+                <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:5px">Approach</div>
+                <div style="font-size:13px;color:#111">Replaces raw TCP sockets with an asyncio WebSocket server (minichain/p2p.py) for non-blocking peer discovery and block broadcasting.</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px">What Changed</div>
+            <ul style='margin:6px 0 6px 18px'><li style="font-size:13px;color:#374151;margin-bottom:3px">Migrated P2PNetwork to websockets async protocol</li><li style="font-size:13px;color:#374151;margin-bottom:3px">Implemented automatic peer ping/pong heartbeats and transaction gossip relaying</li><li style="font-size:13px;color:#374151;margin-bottom:3px">Updated P2P network integration tests</li></ul>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div style="background:#f0fdf4;border-radius:8px;padding:10px">
+                <div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;margin-bottom:4px">&#10003; Strengths</div>
+                <div style="font-size:13px;color:#374151">Significantly improves network throughput, peer connection stability, and broadcast resilience.</div>
+            </div>
+            <div style="background:#fef2f2;border-radius:8px;padding:10px">
+                <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;margin-bottom:4px">&#10007; Weaknesses</div>
+                <div style="font-size:13px;color:#374151">Adds websockets dependency to the core package.</div>
+            </div>
+        </div>
+
+        <div style="background:#eff6ff;border-radius:8px;padding:10px;margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;margin-bottom:4px">&#128269; Outcome If Merged</div>
+            <div style="font-size:13px;color:#1e3a5f">MiniChain nodes maintain persistent, non-blocking P2P connections across multiple peers.</div>
+        </div>
+
+        <div style="margin-bottom:10px">
+            <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:4px">&#10067; Open Questions for mentor</div>
+            <ul style='margin:6px 0 6px 18px'><li style="font-size:13px;color:#92400e;margin-bottom:3px">Should max peer connections be capped to avoid memory exhaustion on light hosts?</li></ul>
+        </div>
+
+        <div style="margin-bottom:10px"><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">minichain/p2p.py</span><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">minichain/network.py</span><span style="background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px;display:inline-block;font-family:monospace">tests/test_p2p.py</span></div>
+
+        <details style="margin-top:10px">
+            <summary style="cursor:pointer;font-size:12px;font-weight:600;color:#6b7280">&#128048; CodeRabbit Walkthrough &amp; Changes</summary>
+            <div style="margin-top:10px;font-size:13px;line-height:1.7;max-height:360px;overflow-y:auto;
+                        border:1px solid #e5e7eb;border-radius:6px;padding:14px;color:#374151">
+                <p style='font-weight:700;color:#374151;margin-bottom:6px'>Walkthrough</p><p style='margin-bottom:6px'>Upgrades P2P networking to async websockets with heartbeat mechanisms and broadcast queues.</p>
+<p style='font-weight:700;color:#374151;margin:10px 0 6px'>Changes</p><pre style='font-size:11px;white-space:pre-wrap;color:#374151;background:#f9fafb;padding:10px;border-radius:6px'>**Async WebSocket P2P**
+
+|Layer / File(s)|Summary|
+|---|---|
+|minichain/p2p.py|Migrated P2PNetwork to async websockets protocol.|
+|minichain/network.py|Implemented peer discovery and gossip relay.|</pre>
+            </div>
+        </details>
+    </div></div>
+</body>
+</html>
