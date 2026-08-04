@@ -1,6 +1,6 @@
 name: gitleaks-license-check
 on:
-  pull_request:
+  pull_request_target:
   push:
   workflow_dispatch:
 jobs:
@@ -21,17 +21,17 @@ jobs:
             echo "- run_id: ${{ github.run_id }}"
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
-      - name: Check if triggered from a fork (forks never receive secrets)
-        if: github.event_name == 'pull_request'
+      - name: Check if triggered from a fork
+        if: github.event_name == 'pull_request_target'
         run: |
           BASE_REPO="${{ github.repository }}"
           HEAD_REPO="${{ github.event.pull_request.head.repo.full_name }}"
           echo "- base repo: $BASE_REPO" | tee -a "$GITHUB_STEP_SUMMARY"
           echo "- head repo: $HEAD_REPO" | tee -a "$GITHUB_STEP_SUMMARY"
           if [ "$BASE_REPO" != "$HEAD_REPO" ]; then
-            echo "⚠️ This PR comes from a fork ($HEAD_REPO). GitHub never exposes repo/org secrets to pull_request runs from forks, regardless of secret configuration. Use pull_request_target or check on push/workflow_dispatch instead." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "ℹ️ This PR comes from a fork ($HEAD_REPO), but the workflow runs via pull_request_target, which executes in the BASE repo's context — so org/repo secrets SHOULD be available here even though they weren't under plain pull_request." | tee -a "$GITHUB_STEP_SUMMARY"
           else
-            echo "PR head repo matches base repo — not a fork, secrets should be available if configured correctly." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "PR head repo matches base repo — not a fork." | tee -a "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Verify GITLEAKS_LICENSE is accessible
