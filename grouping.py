@@ -73,6 +73,14 @@ def resolve_groups(pr_data, repo_context=""):
 
         print(f"\n  Conflict group: PRs {pr_nums}")
         print(f"  Running deep group analysis with Ollama...")
+        # Initialize default analysis for all PRs in the group in case Ollama fails
+        for p in prs:
+            p["analysis"] = {
+                "approach": "Could not analyse.", "what_changed": p["title"],
+                "strengths": "Unknown", "weaknesses": "Unknown",
+                "outcome_if_merged": "Unknown", "open_questions": "",
+                "risk": "medium", "summary": p["title"]
+            }
         group_analysis = analyse_group(group_meta, prs, repo_context)
 
         if group_analysis and "pr_analyses" in group_analysis:
