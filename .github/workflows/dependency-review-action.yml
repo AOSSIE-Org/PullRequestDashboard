@@ -14,33 +14,14 @@ on:
       - develop
     # Only re-run when dependency manifests actually change
     paths:
-      # JavaScript / TypeScript / Node
-      - "**/package.json"
-      - "**/package-lock.json"
-      - "**/yarn.lock"
-      - "**/pnpm-lock.yaml"
       # Python
       - "**/requirements*.txt"
       - "**/Pipfile.lock"
       - "**/pyproject.toml"
       - "**/poetry.lock"
-      # Rust
-      - "**/Cargo.toml"
-      - "**/Cargo.lock"
-      # Go
-      - "**/go.mod"
-      - "**/go.sum"
-      # Java / Kotlin / Android
-      - "**/pom.xml"
-      - "**/build.gradle"
-      - "**/build.gradle.kts"
-      - "**/*.gradle"
-      # Ruby
-      - "**/Gemfile.lock"
-      # Docker / Infrastructure
-      - "**/Dockerfile"
-      - "**/docker-compose*.yml"
-      - "**/docker-compose*.yaml"
+      # Node (Danger JS tooling)
+      - "**/package.json"
+      - "**/package-lock.json"
       # GitHub Actions themselves
       - ".github/workflows/*.yml"
       - ".github/workflows/*.yaml"
