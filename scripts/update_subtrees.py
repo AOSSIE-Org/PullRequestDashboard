@@ -67,21 +67,33 @@ def sync_repo_context(repo_name: str, meta: dict, client: httpx.Client):
 
     headers = {"User-Agent": "PullRequestDashboard-Context-Sync"}
     downloaded_count = 0
+    removed_count = 0
 
     for rel_file in KNOWN_CONTEXT_FILES:
         raw_url = f"https://raw.githubusercontent.com/{owner}/{repo}/{ref}/{rel_file}"
+        dest_path = target_dir / rel_file
         try:
             res = client.get(raw_url, headers=headers)
             if res.status_code == 200:
-                dest_path = target_dir / rel_file
                 dest_path.parent.mkdir(parents=True, exist_ok=True)
                 dest_path.write_bytes(res.content)
                 logger.info(f"Downloaded: repos/{repo_name}/{rel_file}")
                 downloaded_count += 1
+            elif res.status_code == 404 and dest_path.exists():
+                # Confirmed absent upstream: remove the stale local copy so it
+                # doesn't keep getting fed into the dashboard prompt.
+                dest_path.unlink()
+                logger.info(f"Removed stale file (deleted upstream): repos/{repo_name}/{rel_file}")
+                removed_count += 1
+            # Any other status (rate limit, server error, etc.) is not a
+            # confirmed absence — leave the existing local copy untouched.
         except Exception as e:
             logger.debug(f"Failed downloading {rel_file} for {repo_name}: {e}")
 
-    logger.info(f"Synced {downloaded_count} context files into repos/{repo_name}")
+    logger.info(
+        f"Synced {downloaded_count} context files into repos/{repo_name} "
+        f"({removed_count} stale file(s) removed)"
+    )
 
 
 def sync_all_subtrees():

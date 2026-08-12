@@ -63,8 +63,9 @@ def load_full_repo_context(repo_name: str) -> str:
             truncated = True
 
         suffix = "\n... [truncated]" if truncated else ""
-        context_parts.append(f"--- {rel_path} ---\n{content}{suffix}")
-        total_chars += len(content)
+        section = f"--- {rel_path} ---\n{content}{suffix}"
+        context_parts.append(section)
+        total_chars += len(section)
         loaded_files += 1
 
     if skipped_files:
