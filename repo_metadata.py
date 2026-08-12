@@ -8,7 +8,7 @@ REPO_METADATA = {
     "GSoC-Proposal-Assistant": {
         "url": "https://github.com/kpj2006/GSoC-Proposal-Assistant",
     },
-    "Template-Repo-Main": {
+    "Template-Repo": {
         "url": "https://github.com/AOSSIE-Org/Template-Repo",
     },
 }
