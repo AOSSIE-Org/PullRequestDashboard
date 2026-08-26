@@ -17,6 +17,63 @@ BASE_DELAY    = 2   # seconds, doubles each retry
 REQUEST_TIMEOUT = 180  # seconds per attempt
 
 
+def _escape_stray_quotes(text):
+    """Escape quotes/control chars a small local model left unescaped inside JSON
+    string values (e.g. `"approach": "adds "quick" validation"`), which otherwise
+    breaks the parser with 'Expecting , delimiter'. A closing `"` is only accepted
+    as-is if it's followed (after whitespace) by `,` `}` `]` `:` or end of text —
+    any other `"` found while inside a string is treated as stray content and escaped."""
+    out = []
+    in_string = False
+    escape = False
+    n = len(text)
+    for i, c in enumerate(text):
+        if in_string:
+            if escape:
+                out.append(c)
+                escape = False
+            elif c == "\\":
+                out.append(c)
+                escape = True
+            elif c == '"':
+                j = i + 1
+                while j < n and text[j] in " \t\r\n":
+                    j += 1
+                if j >= n or text[j] in ',}]:':
+                    out.append(c)
+                    in_string = False
+                else:
+                    out.append('\\"')
+            elif c == "\n":
+                out.append("\\n")
+            elif c == "\r":
+                continue
+            elif c == "\t":
+                out.append("\\t")
+            else:
+                out.append(c)
+        else:
+            if c == '"':
+                in_string = True
+            out.append(c)
+    return "".join(out)
+
+
+def _parse_json_lenient(text):
+    """Try a straight parse, then progressively repair common LLM JSON mistakes
+    (trailing commas, unescaped inner quotes) before giving up."""
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    no_trailing_commas = re.sub(r",(\s*[}\]])", r"\1", text)
+    try:
+        return json.loads(no_trailing_commas)
+    except json.JSONDecodeError:
+        pass
+    return json.loads(_escape_stray_quotes(no_trailing_commas))
+
+
 def _call(prompt, retries=MAX_RETRIES):
     payload = json.dumps({
         "model": OLLAMA_MODEL,
@@ -46,9 +103,7 @@ def _call(prompt, retries=MAX_RETRIES):
                     continue
                 raw = re.sub(r"```json|```", "", raw).strip()
                 m = re.search(r"\{.*\}", raw, re.DOTALL)
-                if m:
-                    return json.loads(m.group(0))
-                return json.loads(raw)
+                return _parse_json_lenient(m.group(0) if m else raw)
         except json.JSONDecodeError as e:
             print(f"    Ollama JSON parse error (attempt {attempt}/{retries}): {e}")
         except urllib.error.URLError as e:
