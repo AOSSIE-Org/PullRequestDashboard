@@ -4,7 +4,7 @@ render.py — builds conflict_tree.html and isolated_prs.html
 
 import re
 from datetime import datetime
-from github import REPO
+from config import REPO, repo_name
 
 RISK_COLOR = {"low": "#22c55e", "medium": "#f59e0b", "high": "#ef4444"}
 PR_COLORS  = ["#1d4ed8", "#dc2626", "#7c3aed", "#047857", "#b45309"]
@@ -342,7 +342,7 @@ def _html_page(title, h1, subtitle, body, bg="#f3f4f6"):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title} &mdash; MiniChain</title>
+<title>{title} &mdash; {e(repo_name())}</title>
 <style>
   *{{box-sizing:border-box;margin:0;padding:0}}
   body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:{bg};color:#111;padding:24px}}

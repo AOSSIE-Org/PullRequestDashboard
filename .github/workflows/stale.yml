@@ -49,13 +49,13 @@ jobs:
           close-issue-message: >
             This issue was automatically closed after being stale for 7 days with no activity. 😔
             If you believe this was closed in error, feel free to reopen it with additional context.
-            Thank you for contributing to AOSSIE! 🙏
+            Thank you for contributing! 🙏
 
           # Message posted when a stale PR is actually closed
           close-pr-message: >
             This PR was automatically closed after being stale for 7 days with no activity. 😔
             If you would like to continue, please reopen it and ping a maintainer for a review.
-            Thank you for your contribution to AOSSIE! 🙏
+            Thank you for your contribution! 🙏
 
           # ── Labels ──────────────────────────────────────────────────────────
           stale-issue-label: 'Stale'

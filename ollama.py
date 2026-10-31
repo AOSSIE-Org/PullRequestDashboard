@@ -8,9 +8,9 @@ Flow:
 
 import json, re, time
 import urllib.request, urllib.error
+from urllib.parse import urlsplit
 
-OLLAMA_URL   = "http://localhost:11434/api/generate"
-OLLAMA_MODEL = "llama3.2:latest"
+from config import OLLAMA_URL, OLLAMA_MODEL, repo_name
 
 MAX_RETRIES   = 3
 BASE_DELAY    = 2   # seconds, doubles each retry
@@ -79,6 +79,7 @@ def _call(prompt, retries=MAX_RETRIES):
         "model": OLLAMA_MODEL,
         "prompt": prompt,
         "stream": False,
+        "format": "json",  # makes Ollama return complete, valid JSON (small models drop the closing brace)
         "options": {"temperature": 0.1, "num_predict": 2000}
     }).encode("utf-8")
 
@@ -122,7 +123,8 @@ def _call(prompt, retries=MAX_RETRIES):
 
 def check_ollama():
     try:
-        urllib.request.urlopen("http://localhost:11434", timeout=3)
+        parts = urlsplit(OLLAMA_URL)
+        urllib.request.urlopen(f"{parts.scheme}://{parts.netloc}", timeout=3)
         return True
     except Exception:
         return False
@@ -154,7 +156,7 @@ Changes:
 """
 
     pr_num_list = [pr["number"] for pr in pr_data]
-    prompt = f"""{context_block}You are reviewing pull requests for MiniChain — a minimal educational Python blockchain.
+    prompt = f"""{context_block}You are reviewing pull requests for {repo_name()}.
 
 Below are {len(pr_data)} pull requests with their full CodeRabbit walkthroughs and changes.
 {pr_blocks}
@@ -263,7 +265,7 @@ def analyse_single_pr(pr, repo_context=""):
     wt = cr.get("walkthrough", "")[:800]
     ch = cr.get("changes", "")[:400]
 
-    prompt = f"""{context_block}Analyse this pull request for MiniChain (minimal Python blockchain).
+    prompt = f"""{context_block}Analyse this pull request for {repo_name()}.
 
 PR #{pr['number']}: {pr['title']}
 Author: {pr['author']}

@@ -1,4 +1,4 @@
-# Contributing to AOSSIE Pull Request Dashboard
+# Contributing to PR Dashboard
 
 ⭐ First off, thank you for considering contributing to this project! ⭐
 
@@ -114,12 +114,12 @@ Before you start, make sure you have the following installed:
 
 5. **Configure Repository Context**
 
-   Ensure you have a `context.md` file (default context for MiniChain is provided in the repository) that describes the architecture of the project you want to analyze.
+   Pick a repository to test against and run `python main.py owner/repo` (see the README). Optionally add a short `context.md` describing that project.
 
 6. **Run the Project**
 
    ```bash
-   python main.py
+   python main.py owner/repo
    ```
 
 ## 🔄 Development Workflow
