@@ -20,7 +20,7 @@ Everything runs on your machine: no API fees, and no code is sent anywhere excep
 
 * **PR Grouping**: Embeds each PR's title and review summary with sentence-transformers (`all-MiniLM-L6-v2`) and groups the ones that solve the same problem. No model call is needed for grouping.
 * **Conflict Graph**: `conflicts_tree.html` shows each group of overlapping PRs, with a local model's explanation of why they conflict, which PR to prefer, a suggested merge order, and each PR's risk.
-* **Isolated PRs**: `isolated_prs.html` lists PRs that overlap with nothing else, so they can be reviewed and merged on their own.
+* **Isolated PRs**: `isolated_prs.html` lists PRs that didn't join a group. Grouping compares what PRs do (title and review summary), not which files they change, so two isolated PRs can still edit the same file: check for overlapping files before merging.
 * **Project-Aware**: The model is given a short summary of your project, taken from the repository's `AGENTS.md` or `README.md`, or from your own `context.md`.
 * **Fully Local**: Grouping and analysis run on your machine through Ollama.
 
@@ -70,7 +70,7 @@ python main.py your-org/your-repo
 The two reports open in your browser when the run finishes:
 
 * `conflicts_tree.html`: groups of PRs that solve the same problem, with a suggested merge order.
-* `isolated_prs.html`: PRs that overlap with nothing else.
+* `isolated_prs.html`: PRs that didn't join any group. They can still touch the same files as other PRs.
 
 Each group and each isolated PR is one call to the local model, so a run over 20 PRs takes a few minutes on an ordinary computer.
 

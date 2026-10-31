@@ -39,7 +39,7 @@ Configuration lives in `config.py`, read from the command line, then `.env`, the
 - `generate_gh_pages_simulation.py` + `public/` — AOSSIE's example output, published to GitHub
   Pages by `deploy-gh-pages.yml` (AOSSIE-Org only). Not part of the analysis pipeline.
 
-There is currently no automated test suite — verify changes by running `python main.py` end-to-end
+There is currently no automated test suite — verify changes by running `python main.py owner/repo` end-to-end
 against a real repository and inspecting the rendered HTML.
 
 ## Key Design Principles (from README — keep changes aligned with these)

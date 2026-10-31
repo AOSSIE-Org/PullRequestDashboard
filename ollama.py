@@ -8,7 +8,6 @@ Flow:
 
 import json, re, time
 import urllib.request, urllib.error
-from urllib.parse import urlsplit
 
 from config import OLLAMA_URL, OLLAMA_MODEL, repo_name
 
@@ -59,6 +58,36 @@ def _escape_stray_quotes(text):
     return "".join(out)
 
 
+def _strip_trailing_commas(text):
+    """Remove commas directly before } or ] — but not inside string values."""
+    out = []
+    in_string = False
+    escape = False
+    n = len(text)
+    for i, c in enumerate(text):
+        if in_string:
+            out.append(c)
+            if escape:
+                escape = False
+            elif c == "\\":
+                escape = True
+            elif c == '"':
+                in_string = False
+        elif c == '"':
+            in_string = True
+            out.append(c)
+        elif c == ",":
+            j = i + 1
+            while j < n and text[j] in " \t\r\n":
+                j += 1
+            if j < n and text[j] in "}]":
+                continue
+            out.append(c)
+        else:
+            out.append(c)
+    return "".join(out)
+
+
 def _parse_json_lenient(text):
     """Try a straight parse, then progressively repair common LLM JSON mistakes
     (trailing commas, unescaped inner quotes) before giving up."""
@@ -66,7 +95,7 @@ def _parse_json_lenient(text):
         return json.loads(text)
     except json.JSONDecodeError:
         pass
-    no_trailing_commas = re.sub(r",(\s*[}\]])", r"\1", text)
+    no_trailing_commas = _strip_trailing_commas(text)
     try:
         return json.loads(no_trailing_commas)
     except json.JSONDecodeError:
@@ -123,8 +152,9 @@ def _call(prompt, retries=MAX_RETRIES):
 
 def check_ollama():
     try:
-        parts = urlsplit(OLLAMA_URL)
-        urllib.request.urlopen(f"{parts.scheme}://{parts.netloc}", timeout=3)
+        # GET /api/tags on the same base as OLLAMA_URL, so a reverse-proxy prefix is kept.
+        base = OLLAMA_URL.rsplit("/api/", 1)[0]
+        urllib.request.urlopen(f"{base}/api/tags", timeout=3)
         return True
     except Exception:
         return False

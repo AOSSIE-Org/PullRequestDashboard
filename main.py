@@ -13,7 +13,7 @@ Run: python main.py owner/repo      (or set TARGET_REPO in .env)
 Requires: gh (authenticated), ollama running on localhost:11434
 """
 
-import os, time, webbrowser
+import os, sys, time, webbrowser
 from config   import REPO, PR_STATE, OLLAMA_URL
 from github   import fetch_prs, fetch_pr_files, fetch_coderabbit_sections, check_gh_auth, fetch_repo_context
 from ollama   import check_ollama
@@ -79,7 +79,7 @@ def _build_pr_data(raw):
 
 
 def main():
-    if not REPO or REPO.count("/") != 1:
+    if {"-h", "--help"} & set(sys.argv[1:]) or not REPO or REPO.count("/") != 1:
         print("Usage: python main.py owner/repo   (or set TARGET_REPO=owner/repo in .env)")
         return
 

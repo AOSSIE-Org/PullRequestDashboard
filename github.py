@@ -144,8 +144,12 @@ def fetch_repo_context():
         with open(CONTEXT_FILE, "r", encoding="utf-8") as f:
             return f.read().strip(), "context.md"
     for path in ("AGENTS.md", "README.md"):
-        code, stdout, _ = _gh_run(["gh", "api", "-H", "Accept: application/vnd.github.raw",
-                                   f"repos/{REPO}/contents/{path}"], retries=1, quiet=True)
+        cmd = ["gh", "api", "-H", "Accept: application/vnd.github.raw", f"repos/{REPO}/contents/{path}"]
+        code, stdout, stderr = _gh_run(cmd, retries=1, quiet=True)
+        if code != 0 and "HTTP 404" not in stderr:
+            code, stdout, stderr = _gh_run(cmd)  # not a missing file: retry like other gh calls
+            if code != 0 and "HTTP 404" not in stderr:
+                print(f"  WARNING: could not read {path} from {REPO}; continuing without it")
         if code == 0 and stdout.strip():
             return stdout.strip(), f"{REPO}/{path}"
     return "", None
