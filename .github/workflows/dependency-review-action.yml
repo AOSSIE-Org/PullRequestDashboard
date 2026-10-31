@@ -81,9 +81,11 @@ jobs:
           # Use for packages with unrecognized/non-standard license declarations.
           # Format: "pkg:npm/name, pkg:pypi/name, pkg:githubactions/owner/repo@version"
           # ── Edit this list when adding approved exceptions ──
-          # allow-dependencies-licenses: >-
-          #   pkg:npm/example-package,
-          #   pkg:pypi/example-package
+          # torch: compound license that adds permissive BSL-1.0, Zlib and
+          # Apache-2.0 WITH LLVM-exception to the allowed ones; it is already
+          # installed by sentence-transformers.
+          allow-dependencies-licenses: >-
+            pkg:pypi/torch
 
           # ── SCOPE FILTERING ─────────────────────────────────
           # Skip dev-only dependencies (test frameworks, linters, etc.)
