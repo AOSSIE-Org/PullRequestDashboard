@@ -1,4 +1,4 @@
-sentence-transformers==6.0.0
+sentence-transformers==6.2.0
 
 # Minimum versions for packages installed with sentence-transformers, so
 # installs (and the OSV scan) never resolve to releases with known
