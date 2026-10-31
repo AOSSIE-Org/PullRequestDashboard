@@ -1,1 +1,10 @@
 sentence-transformers==6.0.0
+
+# Minimum versions for packages installed with sentence-transformers, so
+# installs (and the OSV scan) never resolve to releases with known
+# vulnerabilities. All of these still support Python 3.10.
+torch>=2.13.0
+transformers>=5.10.1,<6.0.0
+anyio>=4.14.2
+certifi>=2026.10.19
+idna>=3.15
