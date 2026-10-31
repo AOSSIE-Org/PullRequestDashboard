@@ -18,6 +18,8 @@ concurrency:
 
 jobs:
   deploy:
+    # Publishes AOSSIE's example output (public/); copies of this repository skip it.
+    if: github.repository_owner == 'AOSSIE-Org'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

@@ -1,270 +1,105 @@
-<!-- Don't delete it -->
-<div name="readme-top"></div>
-
-<!-- Organization Logo -->
-<div align="center" style="display: flex; align-items: center; justify-content: center; gap: 16px;">
-  <img alt="AOSSIE" src="public/aossie-logo.svg" width="175">
-  <img alt="Skills Ecosystem" src="public/skills-logo.svg" width="175" />
-  <img src="public/stability.svg" width="175" alt="Project stability status" />
-</div>
-
-&nbsp;
-
-<!-- Organization Name -->
 <div align="center">
-
-[![Static Badge](https://img.shields.io/badge/aossie.org/PullRequestDashboard-228B22?style=for-the-badge&labelColor=FFC517)](https://github.com/AOSSIE-Org/PullRequestDashboard)
-<!-- Correct deployed url to be added -->
-
+<h1>PR Dashboard</h1>
+<h3>See which open pull requests overlap, and what order to merge them in</h3>
 </div>
 
-<!-- Organization/Project Social Handles -->
-<p align="center">
-<!-- Telegram -->
-<a href="https://t.me/StabilityNexus">
-<img src="https://img.shields.io/badge/Telegram-black?style=flat&logo=telegram&logoColor=white&logoSize=auto&color=24A1DE" alt="Telegram Badge"/></a>
-&nbsp;&nbsp;
-<!-- X (formerly Twitter) -->
-<a href="https://x.com/aossie_org">
-<img src="https://img.shields.io/twitter/follow/aossie_org" alt="X (formerly Twitter) Badge"/></a>
-&nbsp;&nbsp;
-<!-- Discord -->
-<a href="https://discord.gg/hjUhu33uAn">
-<img src="https://img.shields.io/discord/1022871757289422898?style=flat&logo=discord&logoColor=white&logoSize=auto&label=Discord&labelColor=5865F2&color=57F287" alt="Discord Badge"/></a>
-&nbsp;&nbsp;
-<!-- LinkedIn -->
-<a href="https://www.linkedin.com/company/aossie/">
-  <img src="https://img.shields.io/badge/LinkedIn-black?style=flat&logo=LinkedIn&logoColor=white&logoSize=auto&color=0A66C2" alt="LinkedIn Badge"></a>
-&nbsp;&nbsp;
-<!-- Youtube -->
-<a href="https://www.youtube.com/@AOSSIE-Org">
-  <img src="https://img.shields.io/youtube/channel/subscribers/UCKVVLbawY7Gej_3o2WKsoiA?style=flat&logo=youtube&logoColor=white%20&logoSize=auto&labelColor=FF0000&color=FF0000" alt="Youtube Badge"></a>
+**PR Dashboard** is a command-line tool that helps maintainers work through a backlog of pull requests on any GitHub repository.
 
+* **Why:** when several PRs solve the same problem or touch the same code, maintainers often find out only after merging one of them.
+* **Who:** maintainers of any GitHub repository with more than a handful of open PRs.
+* **What:** it fetches the PRs with the GitHub CLI, groups the ones that solve the same problem, and asks a local model to explain each group and suggest a merge order. It writes two HTML reports and opens them in your browser.
+* **How:** `python main.py your-org/your-repo`. It needs `gh` and Ollama; nothing else.
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/AOSSIE-Org/PullRequestDashboard/badge)](https://scorecard.dev/viewer/?uri=github.com/AOSSIE-Org/PullRequestDashboard)
+Everything runs on your machine: no API fees, and no code is sent anywhere except the `gh` calls to GitHub.
 
-[![Best Practices](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FAOSSIE-Org%2FPullRequestDashboard%2Fmain%2Fchecklist-status.json&logo=openssf)](./BestPracticesChecklist.md)
-</p>
-
----
-
-<div align="center">
-<h1>AOSSIE Pull Request Dashboard</h1>
-<h3>Local-First Merge Analysis & Conflict Resolution Dashboard</h3>
-</div>
-
-**Pull Request Dashboard** (PR Dashboard) is a core module in the [AOSSIE Skills Ecosystem](https://github.com/AOSSIE-Org/skills). It is a local-first analysis tool designed to help project maintainers review incoming pull requests, identify semantic conflicts, analyze architectural gaps, and determine optimal merge sequences.
-
-By querying the GitHub API via the GitHub CLI (`gh`), fetching PR diffs and automated AI Bot Reviewer (e.g., CodeRabbit, Devin) walkthrough summaries, loading codebase context (`context.md`), embedding and clustering PRs with SentenceTransformer using `all-MiniLM-L6-v2` in `grouping.py`, and calling local Ollama models for deeper group and isolated-PR analyses, the tool generates a visual Conflict Directed Acyclic Graph (DAG) detailing merge reasoning and post-merge impacts.
-
----
-
-## 🏗️ Role in the Skills Ecosystem
-
-The PR Dashboard acts as the primary code quality and merge analysis layer for maintainers:
-
-```mermaid
-flowchart TD
-    %% Nodes
-    SC["<b><font color='#F59E0B'>Skills Context</font></b><br><br>Skills Core (Shared Org wide skills)<br>per-repo skills (AGENTS.md + skills/ directory)"]
-    Contributors["Contributors"]
-    Maintainers["Maintainers"]
-    
-    SB["<b><font color='#F59E0B'>Skill Bot</font></b> (Discord Assistant)<br><br>Answers contributor questions<br>using asked question-oriented project skills ➔ LLM fallback"]
-    PD["<b><font color='#F59E0B'>PR Dashboard</font></b> (Merge Analysis)<br><br>Clusters PRs semantically, injects skills & communication(e.g. Discord) context.<br>Extracts PR changes briefly & open questions for maintainers to review.<br>Prepares Conflict DAG with merge reasoning & post-merge impact."]
-    SU["<b><font color='#F59E0B'>Skill Updater</font></b> (Knowledge Evolution)<br><br>Collects all logs from different components.<br>Updates relevant repo-skills by asking maintainers or admins<br>to review and approve generated updates."]
-
-    %% Edges
-    %% Contributor Flow
-    Contributors -- "Ask Questions in Discord" --> SB
-    SC -- "Powers answers" --> SB
-    SB -- "If gaps found, send logs for maintainers<br>to answer and update project skill via updater." --> SU
-
-    %% Maintainer Flow
-    Maintainers -- "Reviews PRs<br>with" --> PD
-    SC -- "Powers reasoning" --> PD
-    PD -- "If gaps found, send logs for maintainers<br>to answer and update those project skills via updater." --> SU
-
-    %% Feedback Loop & Sync
-    Maintainers -- "Collects communication platform (e.g. Discord) discussions, filters important<br>topics by giving that repo-skills context, and sends suggested updates to maintainers<br>to reformat or modify as needed (maintainer approve)" --> SU
-    SU -- "PR Skill Updater bot opens PR for gap skills and<br>recently merged PR context (maintainers approve)" --> SC
-
-    %% Style Classes
-    classDef yellowBox fill:#1E293B,stroke:#F59E0B,stroke-width:2px,color:#F8FAFC;
-    classDef purpleBox fill:#1E293B,stroke:#8B5CF6,stroke-width:2px,color:#F8FAFC;
-    
-    class SC,SB,PD,SU yellowBox;
-    class Contributors,Maintainers purpleBox;
-```
-
-
-1. **Pull Request Fetching**: The dashboard connects to GitHub via `gh` to retrieve open/closed PRs, modified files, and AI Bot Reviewer (e.g., CodeRabbit, Devin) summaries.
-2. **Context-Grounded Reasoning**: It reads the local repository context (`context.md`) and the global/per-repo skills from the Skills Core to evaluate PRs against the project rules.
-3. **DAG Generation**: It renders an interactive Conflict DAG illustrating PR dependency relationships, suggested merge sequences, and post-merge impact.
-4. **Gap Logging**: If the dashboard identifies any architectural gaps or changes not covered in the current skills context, it logs them to `gap_log.json` to be consumed by the [Skill Updater](https://github.com/kpj2006/skill-updater).
+**Example:** [AOSSIE's example output](https://aossie-org.github.io/PullRequestDashboard/) shows the two reports for a real repository.
 
 ---
 
 ## 🚀 Key Features
 
-* **Semantic PR Clustering**: Attributes semantic PR embedding and clustering to SentenceTransformer using `all-MiniLM-L6-v2` in `grouping.py`, while local Ollama models are responsible for deeper group and isolated-PR analyses.
-* **Conflict DAG Visualization**: Renders an interactive HTML report (`conflicts_tree.html`) detailing overlapping file conflicts, recommended merge sequences, and post-merge architectural impacts.
-* **Isolated PR Filtering**: Identifies non-conflicting, independent PRs and lists them in `isolated_prs.html` for immediate, safe merging.
-* **Local-First Analysis**: Executes all clustering, evaluation, and DAG reasoning locally through Ollama, ensuring data privacy with zero external API costs.
-* **Feedback Loop Gap Signaling**: Emits gap events for the Skill Updater pipeline when developer PRs introduce architectural changes that are not documented in the skills.
+* **PR Grouping**: Embeds each PR's title and review summary with sentence-transformers (`all-MiniLM-L6-v2`) and groups the ones that solve the same problem. No model call is needed for grouping.
+* **Conflict Graph**: `conflicts_tree.html` shows each group of overlapping PRs, with a local model's explanation of why they conflict, which PR to prefer, a suggested merge order, and each PR's risk.
+* **Isolated PRs**: `isolated_prs.html` lists PRs that didn't join a group. Grouping compares what PRs do (title and review summary), not which files they change, so two isolated PRs can still edit the same file: check for overlapping files before merging.
+* **Project-Aware**: The model is given a short summary of your project, taken from the repository's `AGENTS.md` or `README.md`, or from your own `context.md`.
+* **Fully Local**: Grouping and analysis run on your machine through Ollama.
 
 ---
 
 ## 💻 Tech Stack
 
-* **CLI Integration**: GitHub CLI (`gh`)
-* **Embeddings & Clustering**: sentence-transformers (`all-MiniLM-L6-v2`)
-* **Local Model Server**: Ollama (`qwen2.5:7b` / `llama3`)
+* **GitHub access**: GitHub CLI (`gh`)
+* **Embeddings & Grouping**: sentence-transformers (`all-MiniLM-L6-v2`)
+* **Local Model Server**: Ollama (default `llama3.2`)
 * **Programming Language**: Python 3.10+
-* **Report Rendering**: HTML5, Vanilla CSS, Tailwind CSS
+* **Reports**: static HTML
 
 ---
-## 🔗 Repository Links
-
-1. [Skills Core Repository](https://github.com/AOSSIE-Org/Skills)
-2. [Interactive Simulation](https://github.com/kpj2006/InteractiveSimulation) (Live Demo: [demo](https://kpj2006.github.io/InteractiveSimulation/))
-3. [Skill Bot Assistant](https://github.com/AOSSIE-Org/SkillBot)
-4. [Skill Updater Pipeline](https://github.com/kpj2006/skill-updater)
-
 
 ## 🏁 Getting Started
 
-### Prerequisites
+### 1. Get the code
 
-* **Python 3.10+**
-* **Ollama** installed and running on your local machine.
-* **GitHub CLI (`gh`)** installed and authenticated with your GitHub account:
-  ```bash
-  gh auth login
-  ```
-
----
-
-### Installation & Run
-
-#### 1. Clone the Repository
+Click **Use this template** at the top of this page to make your own copy, or clone this repository directly:
 
 ```bash
 git clone https://github.com/AOSSIE-Org/PullRequestDashboard.git
 cd PullRequestDashboard
 ```
 
-#### 2. Set Up Virtual Environment & Dependencies
+### 2. Install
 
-**Windows (PowerShell):**
-
-```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
-
-**macOS / Linux:**
+* **Python 3.10+**
+* **[Ollama](https://ollama.com/download)**, then pull a model: `ollama pull llama3.2`
+* **[GitHub CLI](https://cli.github.com/)**, logged in with `gh auth login`. The account needs read access to the repository you analyse.
 
 ```bash
 python -m venv venv
-source venv/bin/activate
+source venv/bin/activate        # Windows (PowerShell): .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
-#### 3. Setup Context File
+The first run downloads the embedding model (about 90 MB).
 
-Ensure you have a `context.md` file detailing the repository architecture inside the dashboard folder (a default context file for [MiniChain](https://github.com/StabilityNexus/MiniChain) is provided as `context.md`).
-
-#### 4. Configuration
-
-All configuration settings are defined at the top of each script file—no `.env` file is required.
-
-* **`github.py`** — Set the target repository:
-  
-  ```python
-  REPO = "StabilityNexus/MiniChain"  # ← Change to your repository
-  ```
-
-* **`grouping.py`** — Tune the clustering sensitivity:
-  
-  ```python
-  THRESHOLD = 0.55   # Lower value = more groups, higher value = fewer but tighter groups
-  MIN_SIZE  = 2      # Minimum PRs needed to form a conflict group
-  ```
-
-* **`ollama.py`** — Choose the local LLM model:
-  
-  ```python
-  OLLAMA_MODEL = "qwen2.5:7b"  # Specify the Ollama model to use
-  ```
-
-* **Switch to Production Mode (Open PRs)** in **`github.py`**:
-  
-  By default, the dashboard runs on recent closed PRs for testing. Switch to open PRs for production:
-  
-  ```python
-  # Comment out the test line, and uncomment the production line:
-  # prs = gh(f"repos/{REPO}/pulls?state=closed&per_page=10&sort=updated&direction=desc")
-  return gh_paginate(f"repos/{REPO}/pulls?state=open&per_page=100")
-  ```
-
-#### 5. Run the Dashboard
-
-Execute the entry point script:
+### 3. Run
 
 ```bash
-python main.py
+python main.py your-org/your-repo
 ```
 
-The script will fetch the PRs, cluster them, generate the reports, and automatically open them in your default web browser:
-* `conflicts_tree.html` (Conflict DAG & merge sequencing)
-* `isolated_prs.html` (Independent, ready-to-merge PRs)
+The two reports open in your browser when the run finishes:
 
----
+* `conflicts_tree.html`: groups of PRs that solve the same problem, with a suggested merge order.
+* `isolated_prs.html`: PRs that didn't join any group. They can still touch the same files as other PRs.
 
-## 🗺️ Roadmap & Future Enhancements
+Each group and each isolated PR is one call to the local model, so a run over 20 PRs takes a few minutes on an ordinary computer.
 
-The long-term development of Pull Request Dashboard is divided into several milestones outlined in the [roadmap.md](./roadmap.md).
+### Optional settings
 
----
+To avoid typing the repository every time, copy `.env.example` to `.env` and set `TARGET_REPO`. Other settings:
 
-## 🛡️ Key Design Principles
+| Setting | Default | What it does |
+|---|---|---|
+| `PR_STATE` | `open` | Which PRs to analyse: `open`, `closed` or `all`. |
+| `PR_LIMIT` | `20` | How many of the most recently updated PRs to analyse (up to 100). |
+| `OLLAMA_MODEL` | `llama3.2:latest` | Local model used to explain groups and PRs. |
+| `OLLAMA_URL` | `http://localhost:11434/api/generate` | Where Ollama runs. |
 
-1. **Context-Grounded**: Always evaluate PRs against the project description, architectural rules, and Skills Core.
-2. **Merge Safety First**: Prioritize highlighting overlapping modifications and architectural conflict risks.
-3. **Local-First**: Keep codebase analysis, clustering, and reasoning offline using local Ollama models.
-4. **Actionable Recommendations**: Every conflict group must present a suggested merge order with clear reasoning.
+Grouping sensitivity is set by `THRESHOLD` and `MIN_SIZE` at the top of [`grouping.py`](./grouping.py).
+
+### Getting better results
+
+* **Use an AI reviewer such as [CodeRabbit](https://coderabbit.ai).** PR Dashboard groups PRs by the summary it posts on each PR. Without one, it groups by PR title alone, which is much less accurate.
+* **Give the model a short project summary.** It reads the first 1,000 characters of your repository's `AGENTS.md`, or `README.md` if there is no `AGENTS.md`. If those don't start with a clear description, put a short `context.md` (what the project is and how its code is organized) next to `main.py`; it is used instead.
 
 ---
 
 ## 🙌 Contributing
 
-⭐ Don't forget to star this repository if you find it useful! ⭐
-
-Thank you for considering contributing to this project! Contributions are highly appreciated and welcomed. To ensure smooth collaboration, please refer to our [Contribution Guidelines](./CONTRIBUTING.md).
-
----
-
-## ✨ Maintainers
-
-* [Karun Pacholi](https://github.com/kpj2006) - Lead Developer & Architect
-* [zahnentferner](https://github.com/Zahnentferner) - admin & reviewer
-
+Contributions are welcome. See the [Contribution Guidelines](./CONTRIBUTING.md).
 
 ---
 
 ## 📍 License
 
-This project is licensed under the GNU General Public License v3.0.
-See the [LICENSE](LICENSE) file for details.
-
----
-
-## 💪 Thanks To All Contributors
-
-Thanks a lot for spending your time helping TODO grow. Keep rocking 🥂
-
-[![Contributors](https://contrib.rocks/image?repo=AOSSIE-Org/PullRequestDashboard)](https://github.com/AOSSIE-Org/PullRequestDashboard/graphs/contributors)
-
-© 2026 AOSSIE
+This project is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for details.

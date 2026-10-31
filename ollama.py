@@ -9,12 +9,98 @@ Flow:
 import json, re, time
 import urllib.request, urllib.error
 
-OLLAMA_URL   = "http://localhost:11434/api/generate"
-OLLAMA_MODEL = "llama3.2:latest"
+from config import OLLAMA_URL, OLLAMA_MODEL, repo_name
 
 MAX_RETRIES   = 3
 BASE_DELAY    = 2   # seconds, doubles each retry
 REQUEST_TIMEOUT = 180  # seconds per attempt
+
+
+def _escape_stray_quotes(text):
+    """Escape quotes/control chars a small local model left unescaped inside JSON
+    string values (e.g. `"approach": "adds "quick" validation"`), which otherwise
+    breaks the parser with 'Expecting , delimiter'. A closing `"` is only accepted
+    as-is if it's followed (after whitespace) by `,` `}` `]` `:` or end of text —
+    any other `"` found while inside a string is treated as stray content and escaped."""
+    out = []
+    in_string = False
+    escape = False
+    n = len(text)
+    for i, c in enumerate(text):
+        if in_string:
+            if escape:
+                out.append(c)
+                escape = False
+            elif c == "\\":
+                out.append(c)
+                escape = True
+            elif c == '"':
+                j = i + 1
+                while j < n and text[j] in " \t\r\n":
+                    j += 1
+                if j >= n or text[j] in ',}]:':
+                    out.append(c)
+                    in_string = False
+                else:
+                    out.append('\\"')
+            elif c == "\n":
+                out.append("\\n")
+            elif c == "\r":
+                continue
+            elif c == "\t":
+                out.append("\\t")
+            else:
+                out.append(c)
+        else:
+            if c == '"':
+                in_string = True
+            out.append(c)
+    return "".join(out)
+
+
+def _strip_trailing_commas(text):
+    """Remove commas directly before } or ] — but not inside string values."""
+    out = []
+    in_string = False
+    escape = False
+    n = len(text)
+    for i, c in enumerate(text):
+        if in_string:
+            out.append(c)
+            if escape:
+                escape = False
+            elif c == "\\":
+                escape = True
+            elif c == '"':
+                in_string = False
+        elif c == '"':
+            in_string = True
+            out.append(c)
+        elif c == ",":
+            j = i + 1
+            while j < n and text[j] in " \t\r\n":
+                j += 1
+            if j < n and text[j] in "}]":
+                continue
+            out.append(c)
+        else:
+            out.append(c)
+    return "".join(out)
+
+
+def _parse_json_lenient(text):
+    """Try a straight parse, then progressively repair common LLM JSON mistakes
+    (trailing commas, unescaped inner quotes) before giving up."""
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    no_trailing_commas = _strip_trailing_commas(text)
+    try:
+        return json.loads(no_trailing_commas)
+    except json.JSONDecodeError:
+        pass
+    return json.loads(_escape_stray_quotes(no_trailing_commas))
 
 
 def _call(prompt, retries=MAX_RETRIES):
@@ -22,6 +108,7 @@ def _call(prompt, retries=MAX_RETRIES):
         "model": OLLAMA_MODEL,
         "prompt": prompt,
         "stream": False,
+        "format": "json",  # makes Ollama return complete, valid JSON (small models drop the closing brace)
         "options": {"temperature": 0.1, "num_predict": 2000}
     }).encode("utf-8")
 
@@ -46,9 +133,7 @@ def _call(prompt, retries=MAX_RETRIES):
                     continue
                 raw = re.sub(r"```json|```", "", raw).strip()
                 m = re.search(r"\{.*\}", raw, re.DOTALL)
-                if m:
-                    return json.loads(m.group(0))
-                return json.loads(raw)
+                return _parse_json_lenient(m.group(0) if m else raw)
         except json.JSONDecodeError as e:
             print(f"    Ollama JSON parse error (attempt {attempt}/{retries}): {e}")
         except urllib.error.URLError as e:
@@ -67,7 +152,9 @@ def _call(prompt, retries=MAX_RETRIES):
 
 def check_ollama():
     try:
-        urllib.request.urlopen("http://localhost:11434", timeout=3)
+        # GET /api/tags on the same base as OLLAMA_URL, so a reverse-proxy prefix is kept.
+        base = OLLAMA_URL.rsplit("/api/", 1)[0]
+        urllib.request.urlopen(f"{base}/api/tags", timeout=3)
         return True
     except Exception:
         return False
@@ -99,7 +186,7 @@ Changes:
 """
 
     pr_num_list = [pr["number"] for pr in pr_data]
-    prompt = f"""{context_block}You are reviewing pull requests for MiniChain — a minimal educational Python blockchain.
+    prompt = f"""{context_block}You are reviewing pull requests for {repo_name()}.
 
 Below are {len(pr_data)} pull requests with their full CodeRabbit walkthroughs and changes.
 {pr_blocks}
@@ -208,7 +295,7 @@ def analyse_single_pr(pr, repo_context=""):
     wt = cr.get("walkthrough", "")[:800]
     ch = cr.get("changes", "")[:400]
 
-    prompt = f"""{context_block}Analyse this pull request for MiniChain (minimal Python blockchain).
+    prompt = f"""{context_block}Analyse this pull request for {repo_name()}.
 
 PR #{pr['number']}: {pr['title']}
 Author: {pr['author']}

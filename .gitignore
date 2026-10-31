@@ -330,4 +330,5 @@ venv/
 *.pyc
 conflicts_tree.html
 isolated_prs.html
+.env
 .commandcode/

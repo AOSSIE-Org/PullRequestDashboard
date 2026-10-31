@@ -8,6 +8,17 @@
 README.md
 LICENSE
 
+# Files PR Dashboard deliberately does not ship, so copies made with "Use this template" stay clean
+MAINTAINERS.md
+Brand.md
+BestPracticesChecklist.md
+checklist-status.json
+.github/workflows/checklist-score.yml
+.github/workflows/create-initial-issues.yml
+.github/initial-issues.json
+public/aossie-logo.svg
+public/stability.svg
+
 # GitHub workflows are not synced by default due to GitHub policy
 # .github/workflows/
 

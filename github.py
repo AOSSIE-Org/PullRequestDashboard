@@ -2,20 +2,21 @@
 github.py — all GitHub CLI interactions with retry hardening
 """
 
-import subprocess, json, re, time
+import os, subprocess, json, re, time
 
-REPO = "StabilityNexus/MiniChain"
+from config import REPO, PR_STATE, PR_LIMIT, CONTEXT_FILE
+
 GH_RETRIES     = 3
 GH_RETRY_SLEEP = 2  # seconds
 
 
-def _gh_run(cmd):
+def _gh_run(cmd, retries=GH_RETRIES, quiet=False):
     """Run a gh command with retry logic. Returns (returncode, stdout, stderr)."""
     code = -1
     stdout = ""
     stderr = ""
     last_err = None
-    for attempt in range(1, GH_RETRIES + 1):
+    for attempt in range(1, retries + 1):
         try:
             result = subprocess.run(
                 cmd,
@@ -37,10 +38,11 @@ def _gh_run(cmd):
             stdout = ""
             stderr = str(e)
             last_err = stderr
-        if attempt < GH_RETRIES:
-            print(f"    gh retry {attempt}/{GH_RETRIES} — {last_err[:80]}")
+        if attempt < retries:
+            print(f"    gh retry {attempt}/{retries} — {last_err[:80]}")
             time.sleep(GH_RETRY_SLEEP)
-    print(f"    gh failed after {GH_RETRIES} retries: {last_err[:120] if last_err else 'unknown'}")
+    if not quiet:
+        print(f"    gh failed after {retries} retries: {last_err[:120] if last_err else 'unknown'}")
     return code, stdout, stderr
 
 
@@ -75,7 +77,8 @@ def gh_paginate(endpoint):
 
 
 def fetch_prs():
-    prs = gh(f"repos/{REPO}/pulls?state=closed&per_page=10&sort=updated&direction=desc")
+    limit = max(1, min(PR_LIMIT, 100))
+    prs = gh(f"repos/{REPO}/pulls?state={PR_STATE}&per_page={limit}&sort=updated&direction=desc")
     return prs if isinstance(prs, list) else []
 
 
@@ -132,6 +135,24 @@ def extract_walkthrough_and_changes(text):
         result["changes"] = ""
 
     return result
+
+
+def fetch_repo_context():
+    """Project background for the prompts: a local context.md if present, else the target
+    repository's AGENTS.md, else its README.md. Returns (text, source)."""
+    if os.path.exists(CONTEXT_FILE):
+        with open(CONTEXT_FILE, "r", encoding="utf-8") as f:
+            return f.read().strip(), "context.md"
+    for path in ("AGENTS.md", "README.md"):
+        cmd = ["gh", "api", "-H", "Accept: application/vnd.github.raw", f"repos/{REPO}/contents/{path}"]
+        code, stdout, stderr = _gh_run(cmd, retries=1, quiet=True)
+        if code != 0 and "HTTP 404" not in stderr:
+            code, stdout, stderr = _gh_run(cmd)  # not a missing file: retry like other gh calls
+            if code != 0 and "HTTP 404" not in stderr:
+                print(f"  WARNING: could not read {path} from {REPO}; continuing without it")
+        if code == 0 and stdout.strip():
+            return stdout.strip(), f"{REPO}/{path}"
+    return "", None
 
 
 def extract_linked_issue(body):

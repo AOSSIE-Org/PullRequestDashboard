@@ -2,24 +2,22 @@
 main.py — entry point
 
 Flow:
-  1. Load complete target repo context from repos/<repo_name>/ via context.py
-  2. Fetch all PRs + extract CodeRabbit walkthrough + changes only
-  3. One combined Ollama call -> groups PRs by problem
+  1. Load project context (local context.md, else the repo's AGENTS.md / README.md)
+  2. Fetch PRs + extract CodeRabbit walkthrough + changes only
+  3. Group PRs that solve the same problem (sentence-transformers embeddings)
   4. Deep Ollama analysis per conflict group (all PRs in group together)
   5. Single Ollama analysis per isolated PR
   6. Render two HTML files and open in browser
 
-Run: python main.py
+Run: python main.py owner/repo      (or set TARGET_REPO in .env)
 Requires: gh (authenticated), ollama running on localhost:11434
-Context Sync: python scripts/update_subtrees.py (syncs target repo context into repos/<repo_name>/)
 """
 
-import os, time, webbrowser
-from github   import fetch_prs, fetch_pr_files, fetch_coderabbit_sections, check_gh_auth, REPO
+import os, sys, time, webbrowser
+from config   import REPO, PR_STATE, OLLAMA_URL
+from github   import fetch_prs, fetch_pr_files, fetch_coderabbit_sections, check_gh_auth, fetch_repo_context
 from ollama   import check_ollama
-from grouping import resolve_groups
 from render   import build_conflict_html, build_isolated_html
-from context  import load_full_repo_context
 
 OUT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -81,22 +79,26 @@ def _build_pr_data(raw):
 
 
 def main():
+    if {"-h", "--help"} & set(sys.argv[1:]) or not REPO or REPO.count("/") != 1:
+        print("Usage: python main.py owner/repo   (or set TARGET_REPO=owner/repo in .env)")
+        return
+
     if not check_gh_auth():
         print("ERROR: gh not authenticated. Run: gh auth login")
         return
 
     if not check_ollama():
-        print("ERROR: Ollama not reachable at localhost:11434")
+        print(f"ERROR: Ollama not reachable at {OLLAMA_URL}")
         return
 
-    target_repo_name = REPO.split("/")[-1]
-    print(f"\nLoading full repo context for '{target_repo_name}'...")
-    repo_context = load_full_repo_context(target_repo_name)
+    print(f"\nLoading project context for {REPO}...")
+    repo_context, source = fetch_repo_context()
+    print(f"  {'Using ' + source if source else 'No context.md, AGENTS.md or README.md found — running without context'}")
 
-    print(f"\nFetching PRs for {REPO}...")
+    print(f"\nFetching {PR_STATE} PRs for {REPO}...")
     raw_prs = fetch_prs()
     if not raw_prs:
-        print("No PRs found.")
+        print(f"No {PR_STATE} PRs found (or {REPO} is not accessible with your gh login).")
         return
 
     print(f"Found {len(raw_prs)} PRs. Fetching walkthroughs...\n")
@@ -126,6 +128,7 @@ def main():
 
     # ── Step 2: Semantic clustering + deep analysis ──────────────────────────
     print(f"\nClustering {len(pr_data)} PRs by semantic similarity...")
+    from grouping import resolve_groups  # slow import (torch); only once the checks have passed
     conflict_groups, isolated = resolve_groups(pr_data, repo_context)
 
     print(f"\n  Conflict groups : {len(conflict_groups)}")

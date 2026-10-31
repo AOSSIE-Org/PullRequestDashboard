@@ -8,7 +8,7 @@ on:
 jobs:
   repo-sync:
     runs-on: ubuntu-latest
-    if: github.repository != 'AOSSIE-Org/Template-Repo'
+    if: github.repository != 'AOSSIE-Org/Template-Repo' && github.repository_owner == 'AOSSIE-Org'
     # https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs
     permissions:
       contents: write
