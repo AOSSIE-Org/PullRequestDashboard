@@ -87,53 +87,162 @@ def fetch_pr_files(n):
     return [f["filename"] for f in files] if isinstance(files, list) else []
 
 
-def fetch_coderabbit_sections(n):
-    """Fetch ONLY the Walkthrough and Changes sections from CodeRabbit comment."""
-    raw = None
+def is_coderabbit_skip_or_blocked(text: str) -> bool:
+    """Check if text is a CodeRabbit skip/blocked/rate-limit notice rather than a review."""
+    if not text:
+        return True
 
+    # A real review can include a status banner above its walkthrough. Only
+    # treat the body as a notice when no usable review sections remain.
+    if _has_coderabbit_review_content(text):
+        return False
+
+    # CodeRabbit wraps status-only comments in explicit HTML comment markers.
+    if re.search(
+        r"<!--\s*(?:(?:This is|end of) an auto-generated comment:\s*)?"
+        r"(?:skip review|rate limited)\s+by coderabbit\.ai\s*-->",
+        text,
+        re.IGNORECASE,
+    ):
+        return True
+    if re.search(r"<!--\s*review_access_revoked\s*-->", text, re.IGNORECASE):
+        return True
+
+    # Status headings and blockquoted status lines, rather than phrases that
+    # can legitimately appear inside a normal review.
+    return bool(
+        re.search(
+            r"(?mi)^[ \t]{0,3}>?[ \t]*#{1,6}[ \t]*"
+            r"(?:review skipped|review limit reached|rate limit reached|"
+            r"reviews? (?:are )?(?:disabled|blocked)|rate limited by coderabbit)\b",
+            text,
+        )
+        or re.search(
+            r"(?mi)^[ \t]{0,3}>[ \t]*"
+            r"(?:auto reviews are disabled|reviews? (?:are )?(?:disabled|blocked))\b",
+            text,
+        )
+        or re.match(
+            r"(?i)^\s*(?:>\s*)?"
+            r"(?:review skipped|review limit reached|rate limit reached|"
+            r"rate limited by coderabbit|auto reviews are disabled|"
+            r"reviews? (?:are )?(?:disabled|blocked))\b",
+            text,
+        )
+    )
+
+
+def fetch_coderabbit_sections(n: int) -> dict | None:
+    """Fetch the Walkthrough/Changes sections from a CodeRabbit comment or review.
+
+    Reviews normally contain an "Actionable comments posted" summary instead of
+    those headings, so the oldest usable review body is used as a fallback.
+    """
+    # Check issue comments first (oldest first; API returns ascending ID order)
     comments = gh(f"repos/{REPO}/issues/{n}/comments?per_page=50")
     if isinstance(comments, list):
         for c in comments:
-            if "coderabbit" in c.get("user", {}).get("login", "").lower() and c.get("body"):
-                raw = c["body"]
-                break
+            if "coderabbit" in (c.get("user") or {}).get("login", "").lower() and c.get("body"):
+                extracted = extract_walkthrough_and_changes(c["body"])
+                if extracted:
+                    return extracted
 
-    if not raw:
-        reviews = gh(f"repos/{REPO}/pulls/{n}/reviews?per_page=50")
-        if isinstance(reviews, list):
-            for r in reviews:
-                if "coderabbit" in r.get("user", {}).get("login", "").lower() and r.get("body"):
-                    raw = r["body"]
-                    break
+    # Fallback: PR reviews (oldest first; API returns chronological order).
+    # CodeRabbit reviews usually have an "Actionable comments posted" summary
+    # rather than Walkthrough/Changes headings, so keep the oldest usable body.
+    reviews = gh(f"repos/{REPO}/pulls/{n}/reviews?per_page=50")
+    review_fallback = None
+    if isinstance(reviews, list):
+        for r in reviews:
+            login = (r.get("user") or {}).get("login", "").lower()
+            body = (r.get("body") or "").strip()
+            if "coderabbit" not in login or not body:
+                continue
+            extracted = extract_walkthrough_and_changes(body)
+            if extracted:
+                return extracted
+            if review_fallback is None and not is_coderabbit_skip_or_blocked(body):
+                review_fallback = {"walkthrough": body[:800], "changes": ""}
 
-    if not raw:
+    if review_fallback:
+        return review_fallback
+
+    return None
+
+
+def _extract_markdown_section(text: str, titles: tuple[str, ...]) -> str | None:
+    """Extract a heading and its body, keeping child headings in the section.
+
+    The section ends at the next heading of the same or higher level.
+    """
+    title_pattern = "|".join(re.escape(title) for title in titles)
+    heading_re = re.compile(
+        rf"^[ \t]{{0,3}}(#{{1,6}})[ \t]+(?:{title_pattern})\b[^\n]*$",
+        re.MULTILINE | re.IGNORECASE,
+    )
+    match = heading_re.search(text)
+    if not match:
         return None
 
-    return extract_walkthrough_and_changes(raw)
+    level = len(match.group(1))
+    start = match.end()
+    if start < len(text) and text[start] == "\n":
+        start += 1
+
+    fence = None
+    offset = 0
+    for line in text[start:].splitlines(keepends=True):
+        stripped = line.lstrip()
+        if stripped.startswith(("```", "~~~")):
+            marker = stripped[:3]
+            if fence is None:
+                fence = marker
+            elif fence == marker:
+                fence = None
+        elif fence is None:
+            boundary = re.match(r"^[ \t]{0,3}(#{1,6})[ \t]+\S", line)
+            if boundary and len(boundary.group(1)) <= level:
+                return text[start:start + offset].strip()
+        offset += len(line)
+
+    return text[start:].strip()
 
 
-def extract_walkthrough_and_changes(text):
-    """Pull only the Walkthrough and Changes table from a CodeRabbit comment."""
+def _has_coderabbit_review_content(text: str) -> bool:
+    """Return True when text contains a non-empty walkthrough or changes section."""
+    walkthrough = _extract_markdown_section(text, ("Walkthrough",))
+    if walkthrough is None:
+        walkthrough = _extract_markdown_section(
+            text, ("Summary by CodeRabbit", "Summary", "Overview")
+        )
+    changes = _extract_markdown_section(text, ("Change", "Changes"))
+    return bool(walkthrough or changes)
+
+
+def extract_walkthrough_and_changes(text: str) -> dict | None:
+    """Pull only the Walkthrough and Changes table from a CodeRabbit comment or review."""
+    if not text or is_coderabbit_skip_or_blocked(text):
+        return None
+
     result = {}
 
-    wt_match = re.search(
-        r"##\s*Walkthrough\s*\n(.*?)(?=\n##\s|\Z)",
-        text, re.DOTALL | re.IGNORECASE
-    )
-    if wt_match:
-        result["walkthrough"] = wt_match.group(1).strip()
+    walkthrough = _extract_markdown_section(text, ("Walkthrough",))
+    if walkthrough is None:
+        walkthrough = _extract_markdown_section(
+            text, ("Summary by CodeRabbit", "Summary", "Overview")
+        )
+    if walkthrough:
+        result["walkthrough"] = walkthrough
 
-    ch_match = re.search(
-        r"##\s*Changes\s*\n(.*?)(?=\n##\s|\Z)",
-        text, re.DOTALL | re.IGNORECASE
-    )
-    if ch_match:
-        result["changes"] = ch_match.group(1).strip()
+    changes = _extract_markdown_section(text, ("Change", "Changes"))
+    if changes:
+        result["changes"] = changes
 
     if not result:
-        result["walkthrough"] = text[:800]
-        result["changes"] = ""
+        return None
 
+    result.setdefault("walkthrough", "")
+    result.setdefault("changes", "")
     return result
 
 
