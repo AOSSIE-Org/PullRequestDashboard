@@ -100,8 +100,9 @@ def _is_coderabbit_skip_notice(text: str) -> bool:
 
 
 def fetch_coderabbit_sections(n):
-    """Fetch the Walkthrough and Changes sections from the first usable CodeRabbit
-    comment or review, skipping status notices and comments without those sections."""
+    """Fetch sections from the first usable CodeRabbit comment or review, skipping
+    status notices and falling back to raw text when no sections exist."""
+    fallback = None
     for endpoint in (
         f"repos/{REPO}/issues/{n}/comments?per_page=50",
         f"repos/{REPO}/pulls/{n}/reviews?per_page=50",
@@ -119,7 +120,9 @@ def fetch_coderabbit_sections(n):
             sections = extract_walkthrough_and_changes(body)
             if sections:
                 return sections
-    return None
+            if fallback is None:
+                fallback = {"walkthrough": body[:800], "changes": ""}
+    return fallback
 
 
 def extract_walkthrough_and_changes(text):
