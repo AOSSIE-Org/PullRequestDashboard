@@ -170,6 +170,38 @@ def fetch_coderabbit_sections(n: int) -> dict | None:
     return None
 
 
+def _mask_markdown_fences(text: str) -> str:
+    """Return text with fenced-code content replaced by spaces."""
+    masked = list(text)
+    offset = 0
+    fence = None
+    for line in text.splitlines(keepends=True):
+        body = line.rstrip("\r\n")
+        mask_line = fence is not None
+
+        if fence is not None:
+            marker, length = fence
+            closing = re.match(r"^ {0,3}(`+|~+)[ \t]*$", body)
+            if closing:
+                run = closing.group(1)
+                if run[0] == marker and len(run) >= length:
+                    fence = None
+        else:
+            opening = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", body)
+            if opening:
+                marker = opening.group(1)
+                if marker[0] == "~" or "`" not in opening.group(2):
+                    fence = (marker[0], len(marker))
+                    mask_line = True
+
+        if mask_line:
+            for index in range(offset, offset + len(body)):
+                masked[index] = " "
+        offset += len(line)
+
+    return "".join(masked)
+
+
 def _extract_markdown_section(text: str, titles: tuple[str, ...]) -> str | None:
     """Extract a heading and its body, keeping child headings in the section.
 
@@ -180,30 +212,26 @@ def _extract_markdown_section(text: str, titles: tuple[str, ...]) -> str | None:
         rf"^[ \t]{{0,3}}(#{{1,6}})[ \t]+(?:{title_pattern})\b[^\n]*$",
         re.MULTILINE | re.IGNORECASE,
     )
-    match = heading_re.search(text)
+    masked = _mask_markdown_fences(text)
+    match = heading_re.search(masked)
     if not match:
         return None
 
     level = len(match.group(1))
     start = match.end()
-    if start < len(text) and text[start] == "\n":
+    if text.startswith("\r\n", start):
+        start += 2
+    elif start < len(text) and text[start] in "\r\n":
         start += 1
 
-    fence = None
-    offset = 0
-    for line in text[start:].splitlines(keepends=True):
-        stripped = line.lstrip()
-        if stripped.startswith(("```", "~~~")):
-            marker = stripped[:3]
-            if fence is None:
-                fence = marker
-            elif fence == marker:
-                fence = None
-        elif fence is None:
-            boundary = re.match(r"^[ \t]{0,3}(#{1,6})[ \t]+\S", line)
-            if boundary and len(boundary.group(1)) <= level:
-                return text[start:start + offset].strip()
-        offset += len(line)
+    boundary_re = re.compile(
+        r"^[ \t]{0,3}(#{1,6})[ \t]+\S", re.MULTILINE
+    )
+    boundary = boundary_re.search(masked, start)
+    while boundary:
+        if len(boundary.group(1)) <= level:
+            return text[start:boundary.start()].strip()
+        boundary = boundary_re.search(masked, boundary.end())
 
     return text[start:].strip()
 
@@ -211,7 +239,7 @@ def _extract_markdown_section(text: str, titles: tuple[str, ...]) -> str | None:
 def _has_coderabbit_review_content(text: str) -> bool:
     """Return True when text contains a non-empty walkthrough or changes section."""
     walkthrough = _extract_markdown_section(text, ("Walkthrough",))
-    if walkthrough is None:
+    if not walkthrough:
         walkthrough = _extract_markdown_section(
             text, ("Summary by CodeRabbit", "Summary", "Overview")
         )
@@ -221,13 +249,14 @@ def _has_coderabbit_review_content(text: str) -> bool:
 
 def extract_walkthrough_and_changes(text: str) -> dict | None:
     """Pull only the Walkthrough and Changes table from a CodeRabbit comment or review."""
-    if not text or is_coderabbit_skip_or_blocked(text):
+    # Limit skip/blocked checks to avoid false positives from long reviews.
+    if not text or is_coderabbit_skip_or_blocked(text[:300]):
         return None
 
     result = {}
 
     walkthrough = _extract_markdown_section(text, ("Walkthrough",))
-    if walkthrough is None:
+    if not walkthrough:
         walkthrough = _extract_markdown_section(
             text, ("Summary by CodeRabbit", "Summary", "Overview")
         )
