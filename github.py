@@ -87,9 +87,21 @@ def fetch_pr_files(n):
     return [f["filename"] for f in files] if isinstance(files, list) else []
 
 
+_SKIP_PHRASES = (
+    "review skipped|skip review|auto reviews are disabled|reviews are disabled|"
+    "reviews are blocked|rate limited by coderabbit|rate limit exceeded"
+).split("|")
+
+
+def _is_coderabbit_skip_notice(text: str) -> bool:
+    """Return True when the comment preamble is a CodeRabbit status notice."""
+    head = text[:300].lower()
+    return any(phrase in head for phrase in _SKIP_PHRASES)
+
+
 def fetch_coderabbit_sections(n):
     """Fetch the Walkthrough and Changes sections from the first usable CodeRabbit
-    comment or review, skipping comments without those sections."""
+    comment or review, skipping status notices and comments without those sections."""
     for endpoint in (
         f"repos/{REPO}/issues/{n}/comments?per_page=50",
         f"repos/{REPO}/pulls/{n}/reviews?per_page=50",
@@ -101,6 +113,8 @@ def fetch_coderabbit_sections(n):
             login = item.get("user", {}).get("login", "").lower()
             body = item.get("body")
             if "coderabbit" not in login or not body:
+                continue
+            if _is_coderabbit_skip_notice(body):
                 continue
             sections = extract_walkthrough_and_changes(body)
             if sections:
