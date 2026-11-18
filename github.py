@@ -87,33 +87,50 @@ def fetch_pr_files(n):
     return [f["filename"] for f in files] if isinstance(files, list) else []
 
 
+_SKIP_PHRASES = (
+    "review skipped|skip review|auto reviews are disabled|reviews are disabled|"
+    "reviews are blocked|rate limited by coderabbit|rate limit exceeded"
+).split("|")
+
+
+def _is_coderabbit_skip_notice(text: str) -> bool:
+    """Return True when the comment preamble is a CodeRabbit status notice."""
+    head = text[:250].lower()
+    return any(phrase in head for phrase in _SKIP_PHRASES)
+
+
 def fetch_coderabbit_sections(n):
-    """Fetch ONLY the Walkthrough and Changes sections from CodeRabbit comment."""
-    raw = None
-
-    comments = gh(f"repos/{REPO}/issues/{n}/comments?per_page=50")
-    if isinstance(comments, list):
-        for c in comments:
-            if "coderabbit" in c.get("user", {}).get("login", "").lower() and c.get("body"):
-                raw = c["body"]
-                break
-
-    if not raw:
-        reviews = gh(f"repos/{REPO}/pulls/{n}/reviews?per_page=50")
-        if isinstance(reviews, list):
-            for r in reviews:
-                if "coderabbit" in r.get("user", {}).get("login", "").lower() and r.get("body"):
-                    raw = r["body"]
-                    break
-
-    if not raw:
-        return None
-
-    return extract_walkthrough_and_changes(raw)
+    """Fetch sections from the first usable CodeRabbit comment or review, skipping
+    status notices and falling back to raw text when no sections exist."""
+    fallback = None
+    skipped = False
+    for endpoint in (
+        f"repos/{REPO}/issues/{n}/comments?per_page=50",
+        f"repos/{REPO}/pulls/{n}/reviews?per_page=50",
+    ):
+        items = gh(endpoint)
+        if not isinstance(items, list):
+            continue
+        for item in items:
+            login = item.get("user", {}).get("login", "").lower()
+            body = item.get("body")
+            if "coderabbit" not in login or not body:
+                continue
+            if _is_coderabbit_skip_notice(body):
+                skipped = True
+                continue
+            sections = extract_walkthrough_and_changes(body)
+            if sections:
+                return sections
+            if fallback is None:
+                fallback = {"walkthrough": body[:800], "changes": ""}
+    if fallback is None and skipped:
+        return {"walkthrough": "Skipped Review", "changes": ""}
+    return fallback
 
 
 def extract_walkthrough_and_changes(text):
-    """Pull only the Walkthrough and Changes table from a CodeRabbit comment."""
+    """Extract the Walkthrough and Changes sections, or None if neither exists."""
     result = {}
 
     wt_match = re.search(
@@ -131,8 +148,7 @@ def extract_walkthrough_and_changes(text):
         result["changes"] = ch_match.group(1).strip()
 
     if not result:
-        result["walkthrough"] = text[:800]
-        result["changes"] = ""
+        return None
 
     return result
 
