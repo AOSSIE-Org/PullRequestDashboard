@@ -115,11 +115,11 @@ def fetch_coderabbit_sections(n):
             body = item.get("body")
             if "coderabbit" not in login or not body:
                 continue
-            if _is_coderabbit_skip_notice(body):
-                continue
             sections = extract_walkthrough_and_changes(body)
             if sections:
                 return sections
+            if _is_coderabbit_skip_notice(body):
+                continue
             if fallback is None:
                 fallback = {"walkthrough": body[:800], "changes": ""}
     return fallback
