@@ -95,7 +95,7 @@ _SKIP_PHRASES = (
 
 def _is_coderabbit_skip_notice(text: str) -> bool:
     """Return True when the comment preamble is a CodeRabbit status notice."""
-    head = text[:300].lower()
+    head = text[:250].lower()
     return any(phrase in head for phrase in _SKIP_PHRASES)
 
 
